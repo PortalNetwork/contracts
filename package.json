@@ -1,0 +1,17 @@
+{
+  "name": "portal-network-smart-contract",
+  "version": "1.0.0",
+  "description": "Portal Network Smart Contracts",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Phyrex Tsai",
+  "license": "MIT",
+  "dependencies": {
+    "openzeppelin-solidity": "^2.0.0"
+  }
+}
