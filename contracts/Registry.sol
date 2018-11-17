@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-contract Registry {
+interface Registry {
 
     // Logged when the owner of a domain assigns a new owner to a subdomain.
     event NewRegistrant(string indexed name, string indexed protocol, address owner);
