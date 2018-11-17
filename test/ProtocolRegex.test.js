@@ -6,8 +6,8 @@ contract('Protocol Regex', function () {
         try {
             let protocolRegex = await ProtocolRegex.deployed();
 
-            assert.equal(await protocolRegex.matches('ae'), true, 'protocol isn\'t correct');
-            assert.equal(await protocolRegex.matches('x'), false, 'protocol isn\'t correct');
+            assert.equal(await protocolRegex.protocolMatches('ae'), true, 'protocol isn\'t correct');
+            assert.equal(await protocolRegex.protocolMatches('x'), false, 'protocol isn\'t correct');
         } catch (err) {
             console.log(err);
         }

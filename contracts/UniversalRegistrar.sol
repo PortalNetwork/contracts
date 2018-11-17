@@ -1,4 +1,10 @@
 pragma solidity ^0.4.24;
 
-contract UniversalRegistrar {
+import "./regex/NameRegex.sol";
+import "./regex/ProtocolRegex.sol";
+
+contract UniversalRegistrar is NameRegex, ProtocolRegex {
+
+    
+
 }

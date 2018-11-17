@@ -6,8 +6,8 @@ contract('Name Regex', function () {
         try {
             let nameRegex = await NameRegex.deployed();
             
-            assert.equal(await nameRegex.matches('x'), true, 'name isn\'t correct');
-            assert.equal(await nameRegex.matches('-'), false, 'name isn\'t correct');
+            assert.equal(await nameRegex.nameMatches('x'), true, 'name isn\'t correct');
+            assert.equal(await nameRegex.nameMatches('-'), false, 'name isn\'t correct');
         } catch (err) {
             console.log(err);
         }

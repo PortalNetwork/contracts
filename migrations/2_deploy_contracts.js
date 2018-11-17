@@ -1,12 +1,14 @@
 var PortalNetworkToken = artifacts.require("./PortalNetworkToken.sol");
 var NameRegex = artifacts.require("./NameRegex.sol");
 var ProtocolRegex = artifacts.require("./ProtocolRegex.sol");
+var UniversalRegistry = artifacts.require("./UniversalRegistry.sol");
 
 module.exports = async (deployer) => {
   // Deploy Universal Registry 
   // Deploy Universal Registrar 
   deployer.deploy(NameRegex);
   deployer.deploy(ProtocolRegex);
+  deployer.deploy(UniversalRegistry);
 
   /*
    * @param PRTAccrudAddr
