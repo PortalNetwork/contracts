@@ -20,6 +20,9 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
         uint _expiredate, 
         uint256 _value
     );
+    
+    event UpgradeUniversalRegistrar(address _universalRegistrarAddr);
+    event UpgradePRTAccrue(address _prtAccrueAddr);
 
     constructor(address _prtAccrueAddr, address _universalRegistrarAddr) public
         ERC20Token(TOKEN_NAME, TOKEN_SYMBOL, TOKEN_DECIMALS, TOKEN_TOTALSUPPLY, msg.sender)
@@ -51,7 +54,6 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
         string _protocol, 
         uint _registrationDate
         ) public onlyUniversalRegistrar returns (bool success) {
-        // TODO only for universal registrar invoke
         balances[_from] = balances[_from].sub(_value);
         balances[prtAccrueAddr] = balances[prtAccrueAddr].add(_value);
 
@@ -73,12 +75,24 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
         return true;
     }
 
-    function updateUniversalRegistrar(address _newUniversalRegistrar) external onlyOwner {
+    function upgradePRTAccure(address _newPRTAccrue) external onlyOwner {
+        require(_newPRTAccrue != address(0));
+        require(_newPRTAccrue != address(this));
+        require(_newPRTAccrue != prtAccrueAddr);
+
+        prtAccrueAddr = _newPRTAccrue;
+
+        emit UpgradePRTAccrue(_newPRTAccrue);
+    }
+
+    function upgradeUniversalRegistrar(address _newUniversalRegistrar) external onlyOwner {
         require(_newUniversalRegistrar != address(0));
         require(_newUniversalRegistrar != address(this));
         require(_newUniversalRegistrar != universalRegistrarAddr);
 
         universalRegistrarAddr = _newUniversalRegistrar;
+
+        emit UpgradeUniversalRegistrar(_newUniversalRegistrar);
     }
 
 }
