@@ -75,6 +75,13 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
         return true;
     }
 
+    function metadata(string _name, string _protocol) public view returns (address, uint, uint, uint256) {
+        string memory protocol = ".".toSlice().concat(_protocol.toSlice());
+        string memory bns = _name.toSlice().concat(protocol.toSlice());
+        Metadata storage m = _metadata[bns];
+        return (m.owner, m.registrationDate, m.expireDate, m.value);
+    }
+
     function upgradePRTAccure(address _newPRTAccrue) external onlyOwner {
         require(_newPRTAccrue != address(0));
         require(_newPRTAccrue != address(this));

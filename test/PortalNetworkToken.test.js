@@ -84,5 +84,15 @@ contract('Portal Network Token', function (accounts) {
         console.log(err);
       }
     });
+
+    it('load metadata', async () => {
+      try {
+        let PRT = await PortalNetworkToken.deployed();
+        let metadata = await PRT.metadata('hello', 'eth');
+        console.log(metadata);
+      } catch (err) {
+        console.log(err);
+      }
+    });
   })
 });
