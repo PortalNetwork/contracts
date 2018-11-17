@@ -1,52 +1,52 @@
 pragma solidity ^0.4.24;
 
 contract ProtocolRegex {
-    struct State {
+    struct ProtocolState {
         bool accepts;
-        function (byte) internal pure returns (State memory) func;
+        function (byte) internal pure returns (ProtocolState memory) func;
     }
 
     string public constant regex = "[a-z]{2,}";
 
-    function s0(byte c) internal pure returns (State memory) {
+    function p0(byte c) internal pure returns (ProtocolState memory) {
         c = c;
-        return State(false, s0);
+        return ProtocolState(false, p0);
     }
 
-    function s1(byte c) internal pure returns (State memory) {
+    function p1(byte c) internal pure returns (ProtocolState memory) {
         if (c >= 97 && c <= 122) {
-            return State(false, s2);
+            return ProtocolState(false, p2);
         }
 
-        return State(false, s0);
+        return ProtocolState(false, p0);
     }
 
-    function s2(byte c) internal pure returns (State memory) {
+    function p2(byte c) internal pure returns (ProtocolState memory) {
         if (c >= 97 && c <= 122) {
-            return State(true, s3);
+            return ProtocolState(true, p3);
         }
 
-        return State(false, s0);
+        return ProtocolState(false, p0);
     }
 
-    function s3(byte c) internal pure returns (State memory) {
+    function p3(byte c) internal pure returns (ProtocolState memory) {
         if (c >= 97 && c <= 122) {
-            return State(true, s4);
+            return ProtocolState(true, p4);
         }
 
-        return State(false, s0);
+        return ProtocolState(false, p0);
     }
 
-    function s4(byte c) internal pure returns (State memory) {
+    function p4(byte c) internal pure returns (ProtocolState memory) {
         if (c >= 97 && c <= 122) {
-            return State(true, s4);
+            return ProtocolState(true, p4);
         }
 
-        return State(false, s0);
+        return ProtocolState(false, p0);
     }
 
-    function matches(string input) public pure returns (bool) {
-        State memory cur = State(false, s1);
+    function protocolMatches(string input) public pure returns (bool) {
+        ProtocolState memory cur = ProtocolState(false, p1);
 
         for (uint i = 0; i < bytes(input).length; i++) {
             byte c = bytes(input)[i];

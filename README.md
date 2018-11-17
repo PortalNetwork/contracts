@@ -50,6 +50,7 @@ truffle test
 ## Reference
 - [Truffle documentation](http://truffleframework.com/docs/)
 - [Solidity Regex](https://github.com/gnidan/solregex)
+- [Solidity String Utils](https://github.com/Arachnid/solidity-stringutils/)
 
 ## License
 [MIT](./LICENSE)
