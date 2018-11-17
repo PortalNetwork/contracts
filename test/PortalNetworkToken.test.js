@@ -19,10 +19,22 @@ contract('Portal Network Token', function (accounts) {
       }
     });
 
+    it('token contract owner', async () => {
+      try {
+        let PRT = await PortalNetworkToken.deployed();
+        let owner = await PRT.isOwner(accounts[0]);
+
+        assert.equal(owner, true, 'owner isn\'t correct');
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
     it('token holder balance', async () => {
       try {
         let PRT = await PortalNetworkToken.deployed();
         let balance = await PRT.balanceOf.call(accounts[0]);
+
         assert.equal(balance.toNumber(), 4000000000000000000000000000, 'balance isn\'t correct');
       } catch (err) {
         console.log(err);
@@ -33,8 +45,27 @@ contract('Portal Network Token', function (accounts) {
       try {
         let PRT = await PortalNetworkToken.deployed();
 
-        
+        accounts.forEach(async (address) => {
+          if (address !== accounts[0]){
+            await PRT.transfer(address, 1000000000000000000, {from: accounts[0]});
+            let balance = await PRT.balanceOf.call(address);
+            assert.equal(balance.toNumber(), 1000000000000000000, 'balance isn\'t correct');
+          }
+        })
+      } catch (err) {
+        console.log(err);
+      }
+    });
 
+    it('change universal registrar address', async () => {
+      try {
+        let PRT = await PortalNetworkToken.deployed();
+        let universalRegistrarAddr = await PRT.universalRegistrarAddr.call();
+        assert.equal(universalRegistrarAddr, '0x0000000000000000000000000000000000000000', 'universal registrar address isn\'t correct');
+        await PRT.updateUniversalRegistrar('0x000000000000000000000000000000000000dead', {from: accounts[0]});
+        universalRegistrarAddr = await PRT.universalRegistrarAddr.call();
+        
+        assert.equal(universalRegistrarAddr, '0x000000000000000000000000000000000000dead', 'universal registrar address isn\'t correct');
       } catch (err) {
         console.log(err);
       }

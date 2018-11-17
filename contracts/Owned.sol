@@ -1,66 +1,66 @@
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.24;
 
 contract Owned {
 
-   address public owner;
-   address public proposedOwner;
+    address public owner;
+    address public proposedOwner;
 
-   event OwnershipTransferInitiated(address indexed _proposedOwner);
-   event OwnershipTransferCompleted(address indexed _newOwner);
-   event OwnershipTransferCanceled();
-
-
-   function Owned() public
-   {
-      owner = msg.sender;
-   }
+    event OwnershipTransferInitiated(address indexed _proposedOwner);
+    event OwnershipTransferCompleted(address indexed _newOwner);
+    event OwnershipTransferCanceled();
 
 
-   modifier onlyOwner() {
-      require(isOwner(msg.sender) == true);
-      _;
-   }
+    constructor() public
+    {
+        owner = msg.sender;
+    }
 
 
-   function isOwner(address _address) public view returns (bool) {
-      return (_address == owner);
-   }
+    modifier onlyOwner() {
+        require(isOwner(msg.sender) == true);
+        _;
+    }
 
 
-   function initiateOwnershipTransfer(address _proposedOwner) public onlyOwner returns (bool) {
-      require(_proposedOwner != address(0));
-      require(_proposedOwner != address(this));
-      require(_proposedOwner != owner);
-
-      proposedOwner = _proposedOwner;
-
-      OwnershipTransferInitiated(proposedOwner);
-
-      return true;
-   }
+    function isOwner(address _address) public view returns (bool) {
+        return (_address == owner);
+    }
 
 
-   function cancelOwnershipTransfer() public onlyOwner returns (bool) {
-      if (proposedOwner == address(0)) {
-         return true;
-      }
+    function initiateOwnershipTransfer(address _proposedOwner) public onlyOwner returns (bool) {
+        require(_proposedOwner != address(0));
+        require(_proposedOwner != address(this));
+        require(_proposedOwner != owner);
 
-      proposedOwner = address(0);
+        proposedOwner = _proposedOwner;
 
-      OwnershipTransferCanceled();
+        emit OwnershipTransferInitiated(proposedOwner);
 
-      return true;
-   }
+        return true;
+    }
 
 
-   function completeOwnershipTransfer() public returns (bool) {
-      require(msg.sender == proposedOwner);
+    function cancelOwnershipTransfer() public onlyOwner returns (bool) {
+        if (proposedOwner == address(0)) {
+            return true;
+        }
 
-      owner = msg.sender;
-      proposedOwner = address(0);
+        proposedOwner = address(0);
 
-      OwnershipTransferCompleted(owner);
+        emit OwnershipTransferCanceled();
 
-      return true;
-   }
+        return true;
+    }
+
+
+    function completeOwnershipTransfer() public returns (bool) {
+        require(msg.sender == proposedOwner);
+
+        owner = msg.sender;
+        proposedOwner = address(0);
+
+        emit OwnershipTransferCompleted(owner);
+
+        return true;
+    }
 }
