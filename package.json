@@ -12,6 +12,7 @@
   "author": "Phyrex Tsai",
   "license": "MIT",
   "dependencies": {
-    "openzeppelin-solidity": "^2.0.0"
+    "openzeppelin-solidity": "^2.0.0",
+    "truffle-privatekey-provider": "^1.0.0"
   }
 }
