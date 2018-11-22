@@ -50,7 +50,7 @@ contract('Portal Network Token', function (accounts) {
       }
     });
 
-    it.skip('token transfer', async () => {
+    it('token transfer', async () => {
       try {
         let PRT = await PortalNetworkToken.deployed();
 
@@ -61,44 +61,6 @@ contract('Portal Network Token', function (accounts) {
             assert.equal(balance.toNumber(), 1000000000000000000, 'balance isn\'t correct');
           }
         })
-      } catch (err) {
-        console.log(err);
-      }
-    });
-
-    it('upgrade universal registrar address', async () => {
-      try {
-        let PRT = await PortalNetworkToken.deployed();
-        let universalRegistrarAddr = await PRT.universalRegistrarAddr.call();
-        //assert.equal(universalRegistrarAddr, '0x0000000000000000000000000000000000000000', 'universal registrar address isn\'t correct');
-        await PRT.upgradeUniversalRegistrar('0x000000000000000000000000000000000000dead', {from: accounts[0]});
-        universalRegistrarAddr = await PRT.universalRegistrarAddr.call();
-        
-        assert.equal(universalRegistrarAddr, '0x000000000000000000000000000000000000dead', 'universal registrar address isn\'t correct');
-      } catch (err) {
-        console.log(err);
-      }
-    });
-
-    it('upgrade PRT accrue address', async () => {
-      try {
-        let PRT = await PortalNetworkToken.deployed();
-        let prtAccrueAddr = await PRT.prtAccrueAddr.call();
-        //assert.equal(prtAccrueAddr, '0x000000000000000000000000000000000000dead', 'PRT accrue address isn\'t correct');
-        await PRT.upgradePRTAccure('0x0000000000000000000000000000000000000001', {from: accounts[0]});
-        prtAccrueAddr = await PRT.prtAccrueAddr.call();
-        
-        assert.equal(prtAccrueAddr, '0x0000000000000000000000000000000000000001', 'PRT accrue address isn\'t correct');
-      } catch (err) {
-        console.log(err);
-      }
-    });
-
-    it('load metadata', async () => {
-      try {
-        let PRT = await PortalNetworkToken.deployed();
-        let metadata = await PRT.metadata('hello', 'eth');
-        console.log(metadata);
       } catch (err) {
         console.log(err);
       }
