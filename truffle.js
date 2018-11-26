@@ -1,3 +1,5 @@
+const PrivateKeyProvider = require("truffle-privatekey-provider");
+
 module.exports = {
   networks: {
     development: {
