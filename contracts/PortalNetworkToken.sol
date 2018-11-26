@@ -46,7 +46,7 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
         require(msg.sender == address(universalRegistrarAddr));
         _;
     }
-
+    
     function transferWithMetadata(
         address _from, 
         uint256 _value, 

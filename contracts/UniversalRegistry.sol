@@ -33,7 +33,7 @@ contract UniversalRegistry is Owned, Registry {
         _;
     }
 
-    function setRegistrant(string _name, string _protocol, address _registrant) public only_protocol_owner(_protocol) {
+    function setRegistrant(string _name, string _protocol, address _registrant) external only_protocol_owner(_protocol) {
         require(_name.toSlice().len() > 0);
         require(_protocol.toSlice().len() > 0);
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
@@ -43,7 +43,7 @@ contract UniversalRegistry is Owned, Registry {
         records[bns].registrant = _registrant;
     }
 
-    function setTTL(string _name, string _protocol, uint64 _ttl) public only_registrant(_name, _protocol) {
+    function setTTL(string _name, string _protocol, uint64 _ttl) external only_registrant(_name, _protocol) {
         require(_name.toSlice().len() > 0);
         require(_protocol.toSlice().len() > 0);
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
@@ -52,7 +52,7 @@ contract UniversalRegistry is Owned, Registry {
         records[bns].ttl = _ttl;
     }
 
-    function registrant(string _name, string _protocol) public view returns (address) {
+    function registrant(string _name, string _protocol) external view returns (address) {
         require(_name.toSlice().len() > 0);
         require(_protocol.toSlice().len() > 0);
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
@@ -60,7 +60,7 @@ contract UniversalRegistry is Owned, Registry {
         return records[bns].registrant;
     }
 
-    function ttl(string _name, string _protocol) public view returns (uint64) {
+    function ttl(string _name, string _protocol) external view returns (uint64) {
         require(_name.toSlice().len() > 0);
         require(_protocol.toSlice().len() > 0);
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());

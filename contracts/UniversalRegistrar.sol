@@ -22,5 +22,7 @@ contract UniversalRegistrar is NameRegex, ProtocolRegex {
         require(ProtocolRegex.protocolMatches(_protocol));
 
         registry.setRegistrant(_name, _protocol, _registrant);
+
+        // TODO set metadata to PortalNetworkToken
     }
 }
