@@ -1,4 +1,5 @@
 const PortalNetworkToken = artifacts.require('PortalNetworkToken.sol');
+const BN = require('bn.js');
 
 contract('Portal Network Token', function (accounts) {
   describe('contract testing', async () => {
@@ -22,7 +23,7 @@ contract('Portal Network Token', function (accounts) {
         assert.equal(name, 'Portal Network Token', 'name isn\'t correct');
         assert.equal(symbol, 'PRT', 'symbol isn\'t correct');
         assert.equal(decimals, 18, 'decimals isn\'t correct');
-        assert.equal(totalSupply.toNumber(), 4000000000000000000000000000, 'totalSupply isn\'t correct');
+        assert.equal((new BN(totalSupply, 16)).toString(10), '4000000000000000000000000000', 'totalSupply isn\'t correct');
       } catch (err) {
         console.log(err);
       }
@@ -44,7 +45,7 @@ contract('Portal Network Token', function (accounts) {
         let PRT = await PortalNetworkToken.deployed();
         let balance = await PRT.balanceOf.call(accounts[0]);
 
-        assert.equal(balance.toNumber(), 4000000000000000000000000000, 'balance isn\'t correct');
+        assert.equal((new BN(balance, 16)).toString(10), '4000000000000000000000000000', 'balance isn\'t correct');
       } catch (err) {
         console.log(err);
       }
@@ -74,7 +75,7 @@ contract('Portal Network Token', function (accounts) {
         await PRT.upgradeUniversalRegistrar('0x000000000000000000000000000000000000dead', {from: accounts[0]});
         universalRegistrarAddr = await PRT.universalRegistrarAddr.call();
         
-        assert.equal(universalRegistrarAddr, '0x000000000000000000000000000000000000dead', 'universal registrar address isn\'t correct');
+        assert.equal(universalRegistrarAddr.toString().toLowerCase(), '0x000000000000000000000000000000000000dead', 'universal registrar address isn\'t correct');
       } catch (err) {
         console.log(err);
       }
@@ -84,7 +85,7 @@ contract('Portal Network Token', function (accounts) {
       try {
         let PRT = await PortalNetworkToken.deployed();
         let prtAccrueAddr = await PRT.prtAccrueAddr.call();
-        //assert.equal(prtAccrueAddr, '0x000000000000000000000000000000000000dead', 'PRT accrue address isn\'t correct');
+        //assert.equal(prtAccrueAddr.toString().toLowerCase(), '0x000000000000000000000000000000000000dead', 'PRT accrue address isn\'t correct');
         await PRT.upgradePRTAccure('0x0000000000000000000000000000000000000001', {from: accounts[0]});
         prtAccrueAddr = await PRT.prtAccrueAddr.call();
         
