@@ -1,5 +1,11 @@
 # Portal Network Contracts
 
+## Prerequirement
+
+- Solidity: 0.4.24
+- Truffle
+- Ganache
+
 ### Portal Network Token (PRT)
 Portal Network Token (PRT) is a requirement for Portal Network’s blockchain name service to be decentralized, scalable and operate across different protocols. It will fuel the adoption of its BNS standard through built-in incentives for stakeholders, and will be the access gate to Portal Network’s additional services like MUMEI and KAIZEN. PRT tokens are fungible, ERC20-based Ethereum Tokens.  
   

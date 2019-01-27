@@ -25,4 +25,6 @@ contract UniversalRegistrar is NameRegex, ProtocolRegex {
 
         // TODO set metadata to PortalNetworkToken
     }
+
+     
 }
