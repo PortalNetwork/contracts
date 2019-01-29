@@ -22,6 +22,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         uint registrationDate;
         uint value;
         uint highestBid;
+        address owner;
     }
 
     enum Mode { Open, Auction, Owned, Forbidden, Reveal, NotYetAvailable }
@@ -32,13 +33,17 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         registry = registryAddr;
     }
 
-    modifier inState(string _name, string _protocol) {
-        // TODO check state
+    // Check the state
+    modifier inState(string _name, string _protocol, Mode _state) {
+        require(state(_name, _protocol) == _state);
         _;
     }
 
     modifier onlyBnsOwner(string _name, string _protocol) {
         // TODO check the domain owner, msg.sender is the highest bidder
+        string memory protocol = ".".toSlice().concat(_protocol.toSlice());
+        string memory bns = _name.toSlice().concat(protocol.toSlice());
+        require(state(_name, _protocol) == Mode.Owned && msg.sender == _entries[bns].owner);
         _;
     }
 
