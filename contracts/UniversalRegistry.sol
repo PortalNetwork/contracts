@@ -21,19 +21,19 @@ contract UniversalRegistry is Owned, Registry {
     mapping (string => Record) records;
     mapping (string => address) protocols;
 
-    modifier only_protocol_owner(string _protocol) {
+    modifier onlyProtocolOwner(string _protocol) {
         require(protocols[_protocol] == msg.sender);
         _;
     }
 
-    modifier only_registrant(string _name, string _protocol) {
+    modifier onlyRegistrant(string _name, string _protocol) {
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
         require(records[bns].registrant == msg.sender);
         _;
     }
 
-    function setRegistrant(string _name, string _protocol, address _registrant) external only_protocol_owner(_protocol) {
+    function setRegistrant(string _name, string _protocol, address _registrant) external onlyProtocolOwner(_protocol) {
         require(_name.toSlice().len() > 0);
         require(_protocol.toSlice().len() > 0);
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
@@ -43,7 +43,7 @@ contract UniversalRegistry is Owned, Registry {
         records[bns].registrant = _registrant;
     }
 
-    function setTTL(string _name, string _protocol, uint64 _ttl) external only_registrant(_name, _protocol) {
+    function setTTL(string _name, string _protocol, uint64 _ttl) external onlyRegistrant(_name, _protocol) {
         require(_name.toSlice().len() > 0);
         require(_protocol.toSlice().len() > 0);
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());

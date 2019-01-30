@@ -33,6 +33,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
     event NewBid(address indexed bidder, string name, string protocol);
     event BidRevealed(address indexed owner, string name, string protocol, uint value, uint8 status);
     event BidFinalized(address indexed owner, string name, string protocol, uint value, uint registrationDate);
+    event Transfer(address indexed owner, address indexed newOwner, string name, string protocol);
 
     Registry registry;
     PortalNetworkToken portalNetworkToken;
@@ -78,6 +79,8 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         require(_name.toSlice().len() > 0);
         // TODO check protocol is available
         require(_protocol.toSlice().len() > 0);
+        require(NameRegex.nameMatches(_name));
+        require(ProtocolRegex.protocolMatches(_protocol));
         // TODO check name + protocol Mode is available
         Mode mode = state(_name, _protocol);
         //if (mode == Mode.Auction) return;
@@ -110,6 +113,8 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         // TODO check name + protocol Mode is available
         require(_name.toSlice().len() > 0);
         require(_protocol.toSlice().len() > 0);
+        require(NameRegex.nameMatches(_name));
+        require(ProtocolRegex.protocolMatches(_protocol));
         Mode mode = state(_name, _protocol);
         require(mode == Mode.Reveal);
 
@@ -120,6 +125,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         require(shaBid(_name, _protocol, _value, _salt) == tempSealedBid);
         
         // TODO need check over minimun price
+        require(_value >= minPrice);
         require(portalNetworkToken.balanceOf(msg.sender) >= _value);
 
         // TODO compare with other data where the bid is the highest bid
@@ -148,6 +154,8 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         // TODO check can finalize
         require(_name.toSlice().len() > 0);
         require(_protocol.toSlice().len() > 0);
+        require(NameRegex.nameMatches(_name));
+        require(ProtocolRegex.protocolMatches(_protocol));
         Mode mode = state(_name, _protocol);
         require(mode != Mode.Owned);
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
@@ -156,6 +164,9 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         require(entry.owner == msg.sender);
             
         entry.registrationDate = now;
+        // TODO update UniversalRegistry
+        registry.setRegistrant(_name, _protocol, msg.sender);
+
         // TODO emit event
         emit BidFinalized(msg.sender, _name, _protocol, entry.highestBid, now);
     }
@@ -164,12 +175,38 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         return keccak256(abi.encodePacked(_name, _protocol, value, salt));
     }
 
+    /**
+     * @dev The owner of a domain may transfer it to someone else at any time.
+     *
+     * @param _hash The node to transfer
+     * @param newOwner The address to transfer ownership to
+     */
+    function transfer(string _name, string _protocol, address newOwner) external onlyBnsOwner(_name, _protocol) {
+        require(newOwner != address(0x0));
+        // TODO check name is available
+        require(_name.toSlice().len() > 0);
+        // TODO check protocol is available
+        require(_protocol.toSlice().len() > 0);
+        require(NameRegex.nameMatches(_name));
+        require(ProtocolRegex.protocolMatches(_protocol));
+        string memory protocol = ".".toSlice().concat(_protocol.toSlice());
+        string memory bns = _name.toSlice().concat(protocol.toSlice());
+        Entry storage entry = _entries[bns];
+        address currentOwner = entry.owner;
+        entry.owner = newOwner;
+
+        registry.setRegistrant(_name, _protocol, newOwner);
+        emit Transfer(currentOwner, newOwner, _name, _protocol);
+    }
+
     // TODO entries (status check)
     function entries(string _name, string _protocol) external view returns (Mode, string, string, uint, uint, uint) {
         // TODO check name is available
         require(_name.toSlice().len() > 0);
         // TODO check protocol is available
         require(_protocol.toSlice().len() > 0);
+        require(NameRegex.nameMatches(_name));
+        require(ProtocolRegex.protocolMatches(_protocol));
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
 
@@ -188,6 +225,8 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         require(_name.toSlice().len() > 0);
         // TODO check protocol is available
         require(_protocol.toSlice().len() > 0);
+        require(NameRegex.nameMatches(_name));
+        require(ProtocolRegex.protocolMatches(_protocol));
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
 

@@ -11,6 +11,7 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
 
     address public prtAccrueAddr;
     address public universalRegistrarAddr;
+    address public auctionPoolAddr;
 
     event PRTAccrue(
         address indexed _owner, 
@@ -23,12 +24,14 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
     
     event UpgradeUniversalRegistrar(address _universalRegistrarAddr);
     event UpgradePRTAccrue(address _prtAccrueAddr);
+    event UpgradeAuctionPool(address _auctionPoolAddr);
 
-    constructor(address _prtAccrueAddr, address _universalRegistrarAddr) public
+    constructor(address _prtAccrueAddr, address _universalRegistrarAddr, address _auctionPoolAddr) public
         ERC20Token(TOKEN_NAME, TOKEN_SYMBOL, TOKEN_DECIMALS, TOKEN_TOTALSUPPLY, msg.sender)
     { 
         prtAccrueAddr = _prtAccrueAddr;
         universalRegistrarAddr = _universalRegistrarAddr;
+        auctionPoolAddr = _auctionPoolAddr;
     }
 
     struct Metadata {
@@ -102,4 +105,13 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
         emit UpgradeUniversalRegistrar(_newUniversalRegistrar);
     }
 
+    function upgradeAuctionPool(address _newAuctionPool) external onlyOwner {
+        require(_newAuctionPool != address(0));
+        require(_newAuctionPool != address(this));
+        require(_newAuctionPool != auctionPoolAddr);
+
+        auctionPoolAddr = _newAuctionPool;
+
+        emit UpgradeAuctionPool(_newAuctionPool);
+    }
 }
