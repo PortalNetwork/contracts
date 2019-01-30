@@ -11,6 +11,7 @@ contract('Protocol Regex', function () {
       }
     });
     
+    // protocol has minimum 2 characters
     it('check protocol', async () => {
       try {
         let protocolRegex = await ProtocolRegex.deployed();

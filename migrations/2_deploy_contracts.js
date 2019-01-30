@@ -18,7 +18,7 @@ module.exports = function (deployer) {
     return deployer.deploy(UniversalRegistrar, universalRegistry.address);
   }).then(function(universalRegistrar) {
     console.log('UniversalRegistrar address \t', universalRegistrar.address);
-    return deployer.deploy(PortalNetworkToken, '0x000000000000000000000000000000000000dead', universalRegistrar.address);
+    return deployer.deploy(PortalNetworkToken, '0x000000000000000000000000000000000000dead', universalRegistrar.address, '0x00000000000000000000000000000000deaddead');
   }).then(function(portalNetworkToken) {
     console.log('PortalNetworkToken address \t', portalNetworkToken.address);
   });
