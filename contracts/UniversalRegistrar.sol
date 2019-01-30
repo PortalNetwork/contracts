@@ -5,6 +5,7 @@ import "./regex/NameRegex.sol";
 import "./regex/ProtocolRegex.sol";
 import "./Registry.sol";
 import "./Owned.sol";
+import "./PortalNetworkToken.sol";
 
 contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
 
@@ -27,7 +28,10 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
 
     enum Mode { Open, Auction, Owned, Forbidden, Reveal, NotYetAvailable }
 
+    event NewBid(address indexed bidder, string name, string protocol);
+
     Registry registry;
+    PortalNetworkToken portalNetworkToken;
 
     constructor(Registry registryAddr) public {
         registry = registryAddr;
@@ -70,15 +74,20 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         require(_name.toSlice().len() > 0);
         // TODO check protocol is available
         require(_protocol.toSlice().len() > 0);
+        // TODO check name + protocol Mode is available
+        Mode mode = state(_name, _protocol);
+        if (mode == Mode.Auction) return;
+        require(mode == Mode.Open);
+
+        // TODO check PRT is enough for bidding
+
+        // TODO store sealedBid
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
-        
-        // TODO check name + protocol Mode is available
-        // TODO store sealedBid
-        // TODO emit event
-
-        // TODO bid will check the address have enough PRT
         sealedBids[msg.sender][bns] = _sealedBid;
+        
+        // TODO emit event
+        emit NewBid(msg.sender, _name, _protocol);
     }
 
     // TODO revealAuction
@@ -88,6 +97,9 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         // TODO compare with other data where the bid is the highest bid
         // TODO refund or keep 
         // TODO emit event
+
+        // TODO need check over minimun price
+        require(portalNetworkToken.balanceOf(msg.sender) > 1);
     }
 
     // TODO finalizeAuction
