@@ -17,6 +17,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
 
     uint32 constant totalAuctionLength = 5 days;
     uint32 constant revealPeriod = 48 hours;
+    uint constant minPrice = 10**18;
 
     struct Entry {
         string name;
