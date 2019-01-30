@@ -49,6 +49,28 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
         require(msg.sender == address(universalRegistrarAddr));
         _;
     }
+
+    function transferToAuctionPool(address _from, uint256 _value) external onlyUniversalRegistrar {
+        _transferToAuctionPool(_from, _value);
+    }
+
+    function _transferToAuctionPool(address _from, uint256 _value) internal {
+        require(_value > 0);
+        require(balances[_from] >= _value);
+        balances[_from] = balances[_from].sub(_value);
+        balances[auctionPoolAddr] = balances[auctionPoolAddr].add(_value);
+    }
+
+    function transferBackToOwner(address _to, uint256 _value) external onlyUniversalRegistrar {
+        _transferBackToOwner(_to, _value);
+    }
+
+    function _transferBackToOwner(address _to, uint256 _value) internal {
+        require(_value > 0);
+        require(balances[auctionPoolAddr] >= _value);
+        balances[auctionPoolAddr] = balances[auctionPoolAddr].sub(_value);
+        balances[_to] = balances[_to].add(_value);
+    }
     
     function transferWithMetadata(
         address _from, 
@@ -56,7 +78,17 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
         string _name, 
         string _protocol, 
         uint _registrationDate
-        ) public onlyUniversalRegistrar returns (bool success) {
+    ) external onlyUniversalRegistrar {
+        _transferWithMetadata(_from, _value, _name, _protocol, _registrationDate);
+    }
+
+    function _transferWithMetadata(
+        address _from, 
+        uint256 _value, 
+        string _name, 
+        string _protocol, 
+        uint _registrationDate
+    ) internal {
         balances[_from] = balances[_from].sub(_value);
         balances[prtAccrueAddr] = balances[prtAccrueAddr].add(_value);
 
@@ -74,8 +106,6 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
 
         emit Transfer(_from, prtAccrueAddr, _value);
         emit PRTAccrue(_from, _name, _protocol, _registrationDate, _expireDate, _value);
-
-        return true;
     }
 
     function metadata(string _name, string _protocol) public view returns (address, uint, uint, uint256) {
