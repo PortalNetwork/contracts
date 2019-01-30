@@ -15,6 +15,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
     mapping (address => mapping (string => bytes32)) public sealedBids;
     mapping (string => uint) _registryStartDate;
 
+    uint32 constant totalAuctionLength = 5 days;
     uint32 constant revealPeriod = 48 hours;
 
     struct Entry {
@@ -30,6 +31,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
 
     event NewBid(address indexed bidder, string name, string protocol);
     event BidRevealed(address indexed owner, string name, string protocol, uint value, uint8 status);
+    event BidFinalized(address indexed owner, string name, string protocol, uint value, uint registrationDate);
 
     Registry registry;
     PortalNetworkToken portalNetworkToken;
@@ -85,6 +87,15 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         bytes32 tempSealedBid = sealedBids[msg.sender][bns];
         // TODO make sure the bid is different
         require(tempSealedBid != _sealedBid);
+
+        Entry storage entry = _entries[bns];
+        if (entry.registrationDate == 0) {
+            entry.registrationDate = now + totalAuctionLength;
+            entry.name = _name;
+            entry.protocol = _protocol;
+            entry.value = 0;
+            entry.highestBid = 0;
+        }
 
         // TODO store sealedBid
         sealedBids[msg.sender][bns] = _sealedBid;
@@ -145,6 +156,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
             
         entry.registrationDate = now;
         // TODO emit event
+        emit BidFinalized(msg.sender, _name, _protocol, entry.highestBid, now);
     }
 
     function shaBid(string _name, string _protocol, uint value, bytes32 salt) public pure returns (bytes32) {
