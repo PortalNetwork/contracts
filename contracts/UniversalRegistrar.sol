@@ -29,6 +29,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
     enum Mode { Open, Auction, Owned, Forbidden, Reveal, NotYetAvailable }
 
     event NewBid(address indexed bidder, string name, string protocol);
+    event BidRevealed(address indexed owner, string name, string protocol, uint value, uint8 status);
 
     Registry registry;
     PortalNetworkToken portalNetworkToken;
@@ -76,14 +77,16 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         require(_protocol.toSlice().len() > 0);
         // TODO check name + protocol Mode is available
         Mode mode = state(_name, _protocol);
-        if (mode == Mode.Auction) return;
-        require(mode == Mode.Open);
-
-        // TODO check PRT is enough for bidding
-
-        // TODO store sealedBid
+        //if (mode == Mode.Auction) return;
+        require(mode == Mode.Open || mode == Mode.Auction);
+        
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
+        bytes32 tempSealedBid = sealedBids[msg.sender][bns];
+        // TODO make sure the bid is different
+        require(tempSealedBid != _sealedBid);
+
+        // TODO store sealedBid
         sealedBids[msg.sender][bns] = _sealedBid;
         
         // TODO emit event
@@ -93,20 +96,59 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
     // TODO revealAuction
     function revealAction(string _name, string _protocol, uint _value, bytes32 _salt) external {
         // TODO check name + protocol Mode is available
-        // TODO check salt and information is correct
-        // TODO compare with other data where the bid is the highest bid
-        // TODO refund or keep 
-        // TODO emit event
+        require(_name.toSlice().len() > 0);
+        require(_protocol.toSlice().len() > 0);
+        Mode mode = state(_name, _protocol);
+        require(mode == Mode.Reveal);
 
+        string memory protocol = ".".toSlice().concat(_protocol.toSlice());
+        string memory bns = _name.toSlice().concat(protocol.toSlice());
+        bytes32 tempSealedBid = sealedBids[msg.sender][bns];
+        // TODO check salt and information is correct
+        require(shaBid(_name, _protocol, _value, _salt) == tempSealedBid);
+        
         // TODO need check over minimun price
-        require(portalNetworkToken.balanceOf(msg.sender) > 1);
+        require(portalNetworkToken.balanceOf(msg.sender) >= _value);
+
+        // TODO compare with other data where the bid is the highest bid
+        Entry storage entry = _entries[bns];
+        if (entry.highestBid < _value) {
+            // New winner
+
+            // TODO refund the highestBid to entry.owner, update highestBid to value
+            // TODO success bid, and transfer token to pending pool
+
+            // TODO switch msg.sender to entry.owner, and update highestBid
+            entry.owner = msg.sender;
+            entry.value = entry.highestBid;
+            entry.highestBid = _value;
+
+            emit BidRevealed(msg.sender, _name, _protocol, _value, 1);
+        } else {
+            // Not Winner 
+            emit BidRevealed(msg.sender, _name, _protocol, _value, 0);
+        }
     }
 
     // TODO finalizeAuction
     function finalizeAuction(string _name, string _protocol) external onlyBnsOwner(_name, _protocol) {
         // TODO check name + protocol Mode is available
         // TODO check can finalize
+        require(_name.toSlice().len() > 0);
+        require(_protocol.toSlice().len() > 0);
+        Mode mode = state(_name, _protocol);
+        require(mode != Mode.Owned);
+        string memory protocol = ".".toSlice().concat(_protocol.toSlice());
+        string memory bns = _name.toSlice().concat(protocol.toSlice());
+        Entry storage entry = _entries[bns];
+        require(entry.owner == msg.sender);
+            
+        entry.registrationDate = now;
         // TODO emit event
+    }
+
+    function shaBid(string _name, string _protocol, uint value, bytes32 salt) public pure returns (bytes32) {
+        return keccak256(abi.encodePacked(_name, _protocol, value, salt));
     }
 
     // TODO entries (status check)
