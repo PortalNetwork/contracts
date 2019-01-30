@@ -12,7 +12,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
     using strings for *;
 
     mapping (string => Entry) _entries;
-    mapping (address => mapping (string => bytes32)) public sealedBids;
+    mapping (address => mapping (string => bytes32)) sealedBids;
     mapping (string => uint) _registryStartDate;
 
     uint32 constant totalAuctionLength = 5 days;
@@ -56,25 +56,13 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         _;
     }
 
-    // TODO remove this function in production mode
-    function register(string _name, string _protocol, address _registrant) public {
-        require(_name.toSlice().len() > 0);
-        require(_protocol.toSlice().len() > 0);
-        require(NameRegex.nameMatches(_name));
-        require(ProtocolRegex.protocolMatches(_protocol));
-
-        registry.setRegistrant(_name, _protocol, _registrant);
-
-        // TODO set metadata to PortalNetworkToken
-    }
-
     // TODO startAuction
-    function startAuction(string _name, string _protocol, address _registrant, bytes32 _sealedBid) external {
-        _startAuction(_name, _protocol, _registrant, _sealedBid);
+    function startAuction(string _name, string _protocol, bytes32 _sealedBid) external {
+        _startAuction(_name, _protocol, _sealedBid);
     }
 
     // TODO _startAuction internal
-    function _startAuction(string _name, string _protocol, address _registrant, bytes32 _sealedBid) internal {
+    function _startAuction(string _name, string _protocol, bytes32 _sealedBid) internal {
         // TODO check name is available
         require(_name.toSlice().len() > 0);
         // TODO check protocol is available
@@ -178,7 +166,8 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
     /**
      * @dev The owner of a domain may transfer it to someone else at any time.
      *
-     * @param _hash The node to transfer
+     * @param _name BNS name
+     * @param _protocol BNS protocol
      * @param newOwner The address to transfer ownership to
      */
     function transfer(string _name, string _protocol, address newOwner) external onlyBnsOwner(_name, _protocol) {
@@ -274,9 +263,6 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         return _registryStartDate[_protocol];
     }
 
-    /**
-     * 
-     */
     function setRegistryStartDate(string _protocol, uint registryStartDate) external onlyOwner {
         _registryStartDate[_protocol] = registryStartDate;
     }
