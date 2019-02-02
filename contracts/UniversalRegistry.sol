@@ -94,7 +94,7 @@ contract UniversalRegistry is Owned, NameRegex, ProtocolRegex {
         return records[bns].ttl;
     }
 
-    /*function registerProtocol(string _protocol, address _registrant) public onlyOwner {
+    function registerProtocol(string _protocol, address _registrant) public onlyOwner {
         require(_protocol.toSlice().len() > 0);
         _protocols.push(_protocol);
         protocolOwner[_protocol] = _registrant;
@@ -109,6 +109,6 @@ contract UniversalRegistry is Owned, NameRegex, ProtocolRegex {
             }
         }
         return false;
-    }*/
+    }
 
 }
