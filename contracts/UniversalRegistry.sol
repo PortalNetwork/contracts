@@ -3,13 +3,22 @@ pragma solidity ^0.4.24;
 import "./strings.sol";
 import "./regex/NameRegex.sol";
 import "./regex/ProtocolRegex.sol";
-import "./Registry.sol";
 import "./Owned.sol";
 
-contract UniversalRegistry is Owned, Registry, NameRegex, ProtocolRegex {
+contract UniversalRegistry is Owned, NameRegex, ProtocolRegex {
 
     using strings for *;
 
+    // Logged when the owner of a domain assigns a new owner to a subdomain.
+    event NewRegistrant(string name, string protocol, address owner);
+
+    // Logged when the TTL of a node changes
+    event NewTTL(string name, string protocol, uint64 ttl);
+
+    // Logged when the owner of a domain transfers ownership to a new account.
+    event Transfer(string name, string protocol, address owner);
+
+    // Logged when register protocol
     event RegisterProtocol(string indexed _protocol, address _registrant);
 
     struct Record {
@@ -52,7 +61,7 @@ contract UniversalRegistry is Owned, Registry, NameRegex, ProtocolRegex {
 
     function _setSubdomainRegistrant(string _sub, string _bns, address _owner) internal {
         string memory bns = ".".toSlice().concat(_bns.toSlice());
-        string memory sub = _sub.toSlice().concat(_bns.toSlice());
+        string memory sub = _sub.toSlice().concat(bns.toSlice());
         records[sub].registrant = _owner;
     }
 
@@ -85,7 +94,7 @@ contract UniversalRegistry is Owned, Registry, NameRegex, ProtocolRegex {
         return records[bns].ttl;
     }
 
-    function registerProtocol(string _protocol, address _registrant) public onlyOwner {
+    /*function registerProtocol(string _protocol, address _registrant) public onlyOwner {
         require(_protocol.toSlice().len() > 0);
         _protocols.push(_protocol);
         protocolOwner[_protocol] = _registrant;
@@ -93,13 +102,13 @@ contract UniversalRegistry is Owned, Registry, NameRegex, ProtocolRegex {
         emit RegisterProtocol(_protocol, _registrant);
     }
 
-    function isProtocolAvailable(string _protocol) public returns (bool) {
+    function isProtocolAvailable(string _protocol) public view returns (bool) {
         for(uint i = 0; i < _protocols.length; i++) {
-            if (keccak256(_protocol) == keccak256(_protocols[i])) {
+            if (keccak256(abi.encodePacked(_protocol)) == keccak256(abi.encodePacked(_protocols[i]))) {
                 return true;
             }
         }
         return false;
-    }
+    }*/
 
 }
