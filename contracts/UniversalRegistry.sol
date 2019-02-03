@@ -96,6 +96,7 @@ contract UniversalRegistry is Owned, NameRegex, ProtocolRegex {
 
     function registerProtocol(string _protocol, address _registrant) public onlyOwner {
         require(_protocol.toSlice().len() > 0);
+        require(isProtocolAvailable(_protocol) == false);
         _protocols.push(_protocol);
         protocolOwner[_protocol] = _registrant;
 
