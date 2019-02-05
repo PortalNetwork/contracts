@@ -1,4 +1,5 @@
 const UniversalRegistry = artifacts.require('UniversalRegistry.sol');
+const UniversalRegistrar = artifacts.require('UniversalRegistrar.sol');
 
 contract('UniversalRegistry', function (accounts) {
   describe('contract testing', async () => {
@@ -24,5 +25,15 @@ contract('UniversalRegistry', function (accounts) {
         console.log(err);
       }
     });
+
+    it('check protocol available', async () => {
+      try {
+        let universalRegistry = await UniversalRegistry.deployed();
+        let universalRegistrar = await UniversalRegistrar.deployed();
+
+      } catch (err) {
+        console.log(err);
+      }
+    })
   });
 });
