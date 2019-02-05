@@ -13,11 +13,15 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
 
     mapping (string => Entry) _entries;
     mapping (address => mapping (string => bytes32)) sealedBids;
-    mapping (string => uint) _registryStartDate;
+    mapping (string => ProtocolEntry) _protocolEntries;
 
-    uint32 constant totalAuctionLength = 5 days;
-    uint32 constant revealPeriod = 48 hours;
-    uint constant minPrice = 10**18;
+    struct ProtocolEntry {
+        uint registryStartDate;
+        uint32 totalAuctionLength;
+        uint32 revealPeriod;
+        uint256 minPrice;
+        bool available;
+    }
 
     struct Entry {
         string name;
@@ -73,7 +77,8 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         Mode mode = state(_name, _protocol);
         //if (mode == Mode.Auction) return;
         require(mode == Mode.Open || mode == Mode.Auction);
-        
+        ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
+        require(protocolEntry.available == true);
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
         bytes32 tempSealedBid = sealedBids[msg.sender][bns];
@@ -82,7 +87,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
 
         Entry storage entry = _entries[bns];
         if (entry.registrationDate == 0) {
-            entry.registrationDate = now + totalAuctionLength;
+            entry.registrationDate = now + protocolEntry.totalAuctionLength;
             entry.name = _name;
             entry.protocol = _protocol;
             entry.value = 0;
@@ -105,7 +110,8 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         require(ProtocolRegex.protocolMatches(_protocol));
         Mode mode = state(_name, _protocol);
         require(mode == Mode.Reveal);
-
+        ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
+        require(protocolEntry.available == true);
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
         bytes32 tempSealedBid = sealedBids[msg.sender][bns];
@@ -113,7 +119,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         require(shaBid(_name, _protocol, _value, _salt) == tempSealedBid);
         
         // TODO need check over minimun price
-        require(_value >= minPrice);
+        require(_value >= protocolEntry.minPrice);
         require(portalNetworkToken.balanceOf(msg.sender) >= _value);
 
         // TODO compare with other data where the bid is the highest bid
@@ -216,6 +222,8 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         require(_protocol.toSlice().len() > 0);
         require(NameRegex.nameMatches(_name));
         require(ProtocolRegex.protocolMatches(_protocol));
+        ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
+        require(protocolEntry.available == true);
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
 
@@ -224,7 +232,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         if (!isAllowed(_protocol, now)) {
             return Mode.NotYetAvailable;
         } else if (now < entry.registrationDate) {
-            if (now < entry.registrationDate - revealPeriod) {
+            if (now < entry.registrationDate - protocolEntry.revealPeriod) {
                 return Mode.Auction;
             } else {
                 return Mode.Reveal;
@@ -260,10 +268,24 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
      * @param _protocol The hash to start an auction on
      */
     function getAllowedTime(string _protocol) public view returns (uint) {
-        return _registryStartDate[_protocol];
+        ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
+        require(protocolEntry.available == true);
+        return protocolEntry.registryStartDate;
     }
 
-    function setRegistryStartDate(string _protocol, uint registryStartDate) external onlyOwner {
-        _registryStartDate[_protocol] = registryStartDate;
+    function setProtocolEntry(string _protocol, uint registryStartDate, uint32 totalAuctionLength, uint32 revealPeriod, uint256 minPrice, bool available) external onlyOwner {
+        ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
+        protocolEntry.registryStartDate = registryStartDate;
+        protocolEntry.totalAuctionLength = totalAuctionLength;
+        protocolEntry.revealPeriod = revealPeriod;
+        protocolEntry.minPrice = minPrice;
+        protocolEntry.available = available;
+    }
+
+    function protocolEntries(string _protocol) external view returns (uint, uint32, uint32, uint256, bool) {
+        require(_protocol.toSlice().len() > 0);
+        require(ProtocolRegex.protocolMatches(_protocol));
+        ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
+        return (protocolEntry.registryStartDate, protocolEntry.totalAuctionLength, protocolEntry.revealPeriod, protocolEntry.minPrice, protocolEntry.available);
     }
 }
