@@ -23,8 +23,9 @@ contract('UniversalRegistrar', function (accounts) {
         //let nowTime = await universalRegistrar.getNow.call();
         //console.log('nowTime', (new BN(nowTime, 16)).toString(10));
         
-        //                                                    5 days  48 hours
-        await universalRegistrar.setProtocolEntry('etc', 1549344525, 432000,   172800, 10, 6, "1000000000000000000", {from: accounts[0]});
+        //                                                             5 days  48 hours
+        //await universalRegistrar.setProtocolEntry('etc', 1549344525, 432000,   172800, 10, 6, "1000000000000000000", {from: accounts[0]});
+        await universalRegistrar.setProtocolEntry('etc', 1549344525, 60, 30, 10, 6, "1000000000000000000", {from: accounts[0]});
         let allowedTime = await universalRegistrar.getAllowedTime('etc');
         assert.equal(allowedTime, now, 'allowedTime isn\'t correct');
 

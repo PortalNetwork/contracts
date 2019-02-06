@@ -15,5 +15,8 @@
     "bn.js": "^4.11.8",
     "openzeppelin-solidity": "^2.0.0",
     "truffle-privatekey-provider": "^1.0.0"
+  },
+  "devDependencies": {
+    "solidity-coverage": "^0.5.11"
   }
 }

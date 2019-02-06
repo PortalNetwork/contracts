@@ -168,6 +168,8 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         // TODO update UniversalRegistry
         registry.setRegistrant(_name, _protocol, msg.sender);
 
+        // TODO lock PRT
+
         // TODO emit event
         emit BidFinalized(msg.sender, _name, _protocol, entry.highestBid, now);
     }
