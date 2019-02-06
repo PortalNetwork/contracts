@@ -23,9 +23,6 @@ contract('UniversalRegistrar', function (accounts) {
         const nameMaxLength = 10;
         const nameMinLength = 6;
         const minPrice = "1000000000000000000";
-
-        //let nowTime = await universalRegistrar.getNow.call();
-        //console.log('nowTime', (new BN(nowTime, 16)).toString(10));
         
         //                                                             5 days  48 hours
         //await universalRegistrar.setProtocolEntry('etc', 1549344525, 432000,   172800, 10, 6, "1000000000000000000", {from: accounts[0]});

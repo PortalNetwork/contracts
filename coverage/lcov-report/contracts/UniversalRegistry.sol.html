@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for contracts/UniversalRegistry.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> UniversalRegistry.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">20% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>8/40</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">11.76% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>4/34</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">27.27% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>3/11</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">20.93% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>9/43</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">pragma solidity ^0.4.24;
+&nbsp;
+import "./strings.sol";
+import "./regex/NameRegex.sol";
+import "./regex/ProtocolRegex.sol";
+import "./Owned.sol";
+&nbsp;
+contract UniversalRegistry is Owned, NameRegex, ProtocolRegex {
+&nbsp;
+    using strings for *;
+&nbsp;
+    // Logged when the owner of a domain assigns a new owner to a subdomain.
+    event NewRegistrant(string name, string protocol, address owner);
+&nbsp;
+    // Logged when the TTL of a node changes
+    event NewTTL(string name, string protocol, uint64 ttl);
+&nbsp;
+    // Logged when the owner of a domain transfers ownership to a new account.
+    event Transfer(string name, string protocol, address owner);
+&nbsp;
+    // Logged when register protocol
+    event RegisterProtocol(string indexed _protocol, address _registrant);
+&nbsp;
+    struct Record {
+        address registrant;
+        uint64 ttl;
+    }
+&nbsp;
+    constructor() public {
+    }
+&nbsp;
+    mapping (string =&gt; Record) records;
+    mapping (string =&gt; address) protocolOwner;
+    string[] _protocols;
+&nbsp;
+<span class="fstat-no" title="function not covered" >    modifier onlyProtocolOwner(string _protocol</span>) {
+<span class="cstat-no" title="statement not covered" >        require(_protocol.toSlice().len() &gt; 0)</span>;
+<span class="cstat-no" title="statement not covered" >        require(protocolOwner[_protocol] == msg.sender)</span>;
+        _;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    modifier onlyRegistrant(string _name, string _protocol</span>) {
+        // TODO more check on protocol and name
+<span class="cstat-no" title="statement not covered" >        require(_name.toSlice().len() &gt; 0)</span>;
+<span class="cstat-no" title="statement not covered" >        require(_protocol.toSlice().len() &gt; 0)</span>;
+<span class="cstat-no" title="statement not covered" >        require(NameRegex.nameMatches(_name))</span>;
+<span class="cstat-no" title="statement not covered" >        require(ProtocolRegex.protocolMatches(_protocol))</span>;
+<span class="cstat-no" title="statement not covered" >        string memory protocol = ".".toSlice().concat(_protocol.toSlice())</span>;
+<span class="cstat-no" title="statement not covered" >        string memory bns = _name.toSlice().concat(protocol.toSlice())</span>;
+<span class="cstat-no" title="statement not covered" >        require(records[bns].registrant == msg.sender)</span>;
+        _;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function setSubdomainRegistrant(string _sub, string _name, string _protocol, address _owner) external onlyRegistrant(_name, _protocol</span>) {
+<span class="cstat-no" title="statement not covered" >        require(_sub.toSlice().len() &gt; 0)</span>;
+<span class="cstat-no" title="statement not covered" >        require(NameRegex.nameMatches(_sub))</span>;
+<span class="cstat-no" title="statement not covered" >        string memory protocol = ".".toSlice().concat(_protocol.toSlice())</span>;
+<span class="cstat-no" title="statement not covered" >        string memory bns = _name.toSlice().concat(protocol.toSlice())</span>;
+<span class="cstat-no" title="statement not covered" >        _setSubdomainRegistrant(_sub, bns, _owner)</span>;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function _setSubdomainRegistrant(string _sub, string _bns, address _owner) interna</span>l {
+<span class="cstat-no" title="statement not covered" >        string memory bns = ".".toSlice().concat(_bns.toSlice())</span>;
+<span class="cstat-no" title="statement not covered" >        string memory sub = _sub.toSlice().concat(bns.toSlice())</span>;
+<span class="cstat-no" title="statement not covered" >        records[sub].registrant = _owner</span>;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function setRegistrant(string _name, string _protocol, address _registrant) external onlyProtocolOwner(_protocol</span>) {
+<span class="cstat-no" title="statement not covered" >        require(_name.toSlice().len() &gt; 0)</span>;
+<span class="cstat-no" title="statement not covered" >        require(_protocol.toSlice().len() &gt; 0)</span>;
+<span class="cstat-no" title="statement not covered" >        string memory protocol = ".".toSlice().concat(_protocol.toSlice())</span>;
+<span class="cstat-no" title="statement not covered" >        string memory bns = _name.toSlice().concat(protocol.toSlice())</span>;
+<span class="cstat-no" title="statement not covered" >        require(records[bns].registrant == address(0))</span>;
+<span class="cstat-no" title="statement not covered" >        emit NewRegistrant(_name, _protocol, _registrant);</span>
+<span class="cstat-no" title="statement not covered" >        records[bns].registrant = _registrant</span>;
+    }
+&nbsp;
+    // TODO setSubdomainTTL?
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function setTTL(string _name, string _protocol, uint64 _ttl) external onlyRegistrant(_name, _protocol</span>) {
+<span class="cstat-no" title="statement not covered" >        require(_name.toSlice().len() &gt; 0)</span>;
+<span class="cstat-no" title="statement not covered" >        require(_protocol.toSlice().len() &gt; 0)</span>;
+<span class="cstat-no" title="statement not covered" >        string memory protocol = ".".toSlice().concat(_protocol.toSlice())</span>;
+<span class="cstat-no" title="statement not covered" >        string memory bns = _name.toSlice().concat(protocol.toSlice())</span>;
+<span class="cstat-no" title="statement not covered" >        emit NewTTL(_name, _protocol, _ttl);</span>
+<span class="cstat-no" title="statement not covered" >        records[bns].ttl = _ttl</span>;
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function registrant(string bns) external view returns (address</span>) {
+<span class="cstat-no" title="statement not covered" >        return records[bns].registrant;</span>
+    }
+&nbsp;
+<span class="fstat-no" title="function not covered" >    function ttl(string bns) external view returns (uint64</span>) {
+<span class="cstat-no" title="statement not covered" >        return records[bns].ttl;</span>
+    }
+&nbsp;
+    function registerProtocol(string _protocol, address _registrant) public onlyOwner {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_protocol.toSlice().len() &gt; 0);
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(isProtocolAvailable(_protocol) == false);
+        _protocols.push(_protocol);
+        protocolOwner[_protocol] = _registrant;
+&nbsp;
+        emit RegisterProtocol(_protocol, _registrant);
+    }
+&nbsp;
+    function isProtocolAvailable(string _protocol) public view returns (bool) {
+        for(uint i = 0; i &lt; _protocols.length; i++) {
+            if (keccak256(abi.encodePacked(_protocol)) == keccak256(abi.encodePacked(_protocols[i]))) {
+                return true;
+            }
+        }
+        return false;
+    }
+&nbsp;
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Feb 06 2019 16:38:57 GMT+0800 (CST)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>
