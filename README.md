@@ -53,6 +53,19 @@ truffle migrate
 truffle test
 ```
 
+## Code Coverage
+
+We use [solidity-coverage](https://www.npmjs.com/package/solidity-coverage) for the code coverage of smart contracts.
+
+### Running Code Coverage 
+
+Run the command below.
+```
+./node_modules/.bin/solidity-coverage
+```
+
+Also can check the code coverage report, [HERE](./COVERAGE.md)
+
 ## Reference
 - [Truffle documentation](http://truffleframework.com/docs/)
 - [Solidity Regex](https://github.com/gnidan/solregex)
