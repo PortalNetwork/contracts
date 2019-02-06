@@ -20,28 +20,28 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">45.83% </span>
+        <span class="strong">58.33% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>22/48</span>
+        <span class='fraction'>28/48</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">32.14% </span>
+        <span class="strong">42.86% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>9/28</span>
+        <span class='fraction'>12/28</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">41.67% </span>
+        <span class="strong">66.67% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>5/12</span>
+        <span class='fraction'>8/12</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">44.9% </span>
+        <span class="strong">59.18% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>22/49</span>
+        <span class='fraction'>29/49</span>
       </div>
     </div>
   </div>
-  <div class='status-line low'></div>
+  <div class='status-line medium'></div>
 <pre><table class="coverage">
 <tr><td class="line-count quiet">1
 2
@@ -307,8 +307,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -318,7 +318,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -328,10 +328,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -519,8 +519,8 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
     /**
      * Only available for the UniversalRegistrar contract
      */
-<span class="fstat-no" title="function not covered" >    modifier onlyUniversalRegistrar(</span>) {
-<span class="cstat-no" title="statement not covered" >        require(msg.sender == address(universalRegistrarAddr))</span>;
+    modifier onlyUniversalRegistrar() {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(msg.sender == address(universalRegistrarAddr));
         _;
     }
 &nbsp;
@@ -530,8 +530,8 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
      * @param _from The from address who need to lock the RPT
      * @param _value The tokne of the bidding price
      */
-<span class="fstat-no" title="function not covered" >    function transferToAuctionPool(address _from, uint256 _value) external onlyUniversalRegistra</span>r {
-<span class="cstat-no" title="statement not covered" >        _transferToAuctionPool(_from, _value)</span>;
+    function transferToAuctionPool(address _from, uint256 _value) external onlyUniversalRegistrar {
+        _transferToAuctionPool(_from, _value);
     }
 &nbsp;
     /**
@@ -540,11 +540,11 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
      * @param _from The from address who need to lock the RPT
      * @param _value The token of the bidding price
      */
-<span class="fstat-no" title="function not covered" >    function _transferToAuctionPool(address _from, uint256 _value) interna</span>l {
-<span class="cstat-no" title="statement not covered" >        require(_value &gt; 0)</span>;
-<span class="cstat-no" title="statement not covered" >        require(balances[_from] &gt;= _value)</span>;
-<span class="cstat-no" title="statement not covered" >        balances[_from] = balances[_from].sub(_value)</span>;
-<span class="cstat-no" title="statement not covered" >        balances[auctionPoolAddr] = balances[auctionPoolAddr].add(_value)</span>;
+    function _transferToAuctionPool(address _from, uint256 _value) internal {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_value &gt; 0);
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(balances[_from] &gt;= _value);
+        balances[_from] = balances[_from].sub(_value);
+        balances[auctionPoolAddr] = balances[auctionPoolAddr].add(_value);
     }
 &nbsp;
     /**
@@ -688,7 +688,7 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Feb 06 2019 16:38:57 GMT+0800 (CST)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Feb 06 2019 17:37:20 GMT+0800 (CST)
 </div>
 </div>
 <script src="../prettify.js"></script>
