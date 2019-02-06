@@ -1,6 +1,8 @@
 const UniversalRegistry = artifacts.require('UniversalRegistry.sol');
 const UniversalRegistrar = artifacts.require('UniversalRegistrar.sol');
+const PortalNetworkToken = artifacts.require('PortalNetworkToken.sol');
 const BN = require('bn.js');
+const sleep = require('sleep');
 
 contract('UniversalRegistrar', function (accounts) {
   describe('contract testing', async () => {
@@ -19,7 +21,7 @@ contract('UniversalRegistrar', function (accounts) {
 
         const now = 1549344525;
         const totalAuctionLength = 60; // 432000; // (5 days)
-        const revealPeriod = 30; // 172800; // (48 hours)
+        const revealPeriod = 55; // 172800; // (48 hours)
         const nameMaxLength = 10;
         const nameMinLength = 6;
         const minPrice = "1000000000000000000";
@@ -59,7 +61,20 @@ contract('UniversalRegistrar', function (accounts) {
       } catch (err) {
         console.log(err);
       }
-    })
+    });
+
+    it('set PortalNetworkToken address', async () => {
+      try {
+        let portalNetworkToken = await PortalNetworkToken.deployed();
+        let universalRegistrar = await UniversalRegistrar.deployed();
+
+        await universalRegistrar.updatePortalNetworkTokenAddress(portalNetworkToken.address);
+        const portalNetworkTokenAddress = await universalRegistrar.portalNetworkToken.call();
+        assert.equal(portalNetworkToken.address, portalNetworkTokenAddress, 'PortalNetworkToken address isn\'t correct');
+      } catch (err) {
+        console.log(err);
+      }
+    });
 
     it('start auction with incorrect name', async () => {
       try {
@@ -85,6 +100,22 @@ contract('UniversalRegistrar', function (accounts) {
         const shaBid = await universalRegistrar.shaBid(name, protocol, "2000000000000000000", web3.utils.sha3("secret"));
         const startAuction2 = await universalRegistrar.startAuction(name, protocol, shaBid);
         assert.equal(startAuction2.receipt.status, true);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
+    it('reveal auction', async () => {
+      try {
+        let universalRegistrar = await UniversalRegistrar.deployed();
+        const name = 'welcome';
+        const protocol = 'etc';
+
+        sleep.sleep(6);        
+
+        const revealAuction1 = await universalRegistrar.revealAuction(name, protocol, "2000000000000000000", web3.utils.sha3("secret"));
+        assert.equal(revealAuction1.receipt.status, true);
+
       } catch (err) {
         console.log(err);
       }
