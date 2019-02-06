@@ -13,11 +13,17 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
 
     mapping (string => Entry) _entries;
     mapping (address => mapping (string => bytes32)) sealedBids;
-    mapping (string => uint) _registryStartDate;
+    mapping (string => ProtocolEntry) _protocolEntries;
 
-    uint32 constant totalAuctionLength = 5 days;
-    uint32 constant revealPeriod = 48 hours;
-    uint constant minPrice = 10**18;
+    struct ProtocolEntry {
+        uint registryStartDate;
+        uint32 totalAuctionLength;
+        uint32 revealPeriod;
+        uint minPrice;
+        uint32 nameMaxLength;
+        uint32 nameMinLength;
+        bool available;
+    }
 
     struct Entry {
         string name;
@@ -63,26 +69,29 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
 
     // TODO _startAuction internal
     function _startAuction(string _name, string _protocol, bytes32 _sealedBid) internal {
-        // TODO check name is available
-        require(_name.toSlice().len() > 0);
+        require(_protocol.toSlice().len() > 0, "Protocol length incorrect");
+        require(ProtocolRegex.protocolMatches(_protocol), "Protocol mismatch");
+        ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
+        require(protocolEntry.available == true, "Protocol is not availalbe");
         // TODO check protocol is available
-        require(_protocol.toSlice().len() > 0);
-        require(NameRegex.nameMatches(_name));
-        require(ProtocolRegex.protocolMatches(_protocol));
+        require(NameRegex.nameMatches(_name), "Name mismatch");
+        // TODO check name is available
+        require(_name.toSlice().len() >= protocolEntry.nameMinLength, "Name length incorrect");
         // TODO check name + protocol Mode is available
         Mode mode = state(_name, _protocol);
         //if (mode == Mode.Auction) return;
-        require(mode == Mode.Open || mode == Mode.Auction);
+        require(mode == Mode.Open || mode == Mode.Auction, "Mode incorrect");
         
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
         bytes32 tempSealedBid = sealedBids[msg.sender][bns];
         // TODO make sure the bid is different
-        require(tempSealedBid != _sealedBid);
+        require(tempSealedBid != _sealedBid, "SealedBid is the same");
 
         Entry storage entry = _entries[bns];
         if (entry.registrationDate == 0) {
-            entry.registrationDate = now + totalAuctionLength;
+            entry.registrationDate = now + protocolEntry.totalAuctionLength;
+            entry.owner = address(0x0);
             entry.name = _name;
             entry.protocol = _protocol;
             entry.value = 0;
@@ -98,14 +107,16 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
 
     // TODO revealAuction
     function revealAction(string _name, string _protocol, uint _value, bytes32 _salt) external {
-        // TODO check name + protocol Mode is available
-        require(_name.toSlice().len() > 0);
         require(_protocol.toSlice().len() > 0);
-        require(NameRegex.nameMatches(_name));
         require(ProtocolRegex.protocolMatches(_protocol));
+        ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
+        require(protocolEntry.available == true);
+        // TODO check protocol is available
+        require(NameRegex.nameMatches(_name));
+        // TODO check name is available
+        require(_name.toSlice().len() >= protocolEntry.nameMinLength);
         Mode mode = state(_name, _protocol);
         require(mode == Mode.Reveal);
-
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
         bytes32 tempSealedBid = sealedBids[msg.sender][bns];
@@ -113,7 +124,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         require(shaBid(_name, _protocol, _value, _salt) == tempSealedBid);
         
         // TODO need check over minimun price
-        require(_value >= minPrice);
+        require(_value >= protocolEntry.minPrice);
         require(portalNetworkToken.balanceOf(msg.sender) >= _value);
 
         // TODO compare with other data where the bid is the highest bid
@@ -123,7 +134,11 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
 
             // TODO refund the highestBid to entry.owner, update highestBid to value
             // TODO success bid, and transfer token to pending pool
-
+            if (entry.owner != address(0x0) && entry.highestBid > 0) {
+                portalNetworkToken.transferBackToOwner(entry.owner, entry.highestBid);
+            }
+            portalNetworkToken.transferToAuctionPool(msg.sender, _value);
+            
             // TODO switch msg.sender to entry.owner, and update highestBid
             entry.owner = msg.sender;
             entry.value = entry.highestBid;
@@ -138,22 +153,32 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
 
     // TODO finalizeAuction
     function finalizeAuction(string _name, string _protocol) external onlyBnsOwner(_name, _protocol) {
-        // TODO check name + protocol Mode is available
-        // TODO check can finalize
-        require(_name.toSlice().len() > 0);
         require(_protocol.toSlice().len() > 0);
-        require(NameRegex.nameMatches(_name));
         require(ProtocolRegex.protocolMatches(_protocol));
+        ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
+        require(protocolEntry.available == true);
+        // TODO check protocol is available
+        require(NameRegex.nameMatches(_name));
+        // TODO check name is available
+        require(_name.toSlice().len() >= protocolEntry.nameMinLength);
+        // TODO check name + protocol Mode is available
         Mode mode = state(_name, _protocol);
         require(mode != Mode.Owned);
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
         Entry storage entry = _entries[bns];
         require(entry.owner == msg.sender);
-            
-        entry.registrationDate = now;
+        
         // TODO update UniversalRegistry
         registry.setRegistrant(_name, _protocol, msg.sender);
+
+        uint _value = protocolEntry.minPrice;
+        // TODO adjust value with vickrey auction rule
+        if (entry.value > protocolEntry.minPrice) {
+            _value = entry.value;
+        }
+        // TODO lock PRT
+        portalNetworkToken.transferWithMetadata(entry.owner, _value, entry.name, entry.protocol, entry.registrationDate);
 
         // TODO emit event
         emit BidFinalized(msg.sender, _name, _protocol, entry.highestBid, now);
@@ -210,12 +235,14 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
     //   Reveal -> Open (if nobody bid)
     //   Owned -> Open (releaseDeed or invalidateName)
     function state(string _name, string _protocol) public view returns (Mode) {
-        // TODO check name is available
-        require(_name.toSlice().len() > 0);
+        require(_protocol.toSlice().len() > 0, "Protocol length incorrect");
+        require(ProtocolRegex.protocolMatches(_protocol), "Protocol mismatch");
+        ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
+        require(protocolEntry.available == true, "Protocol is not availalbe");
         // TODO check protocol is available
-        require(_protocol.toSlice().len() > 0);
-        require(NameRegex.nameMatches(_name));
-        require(ProtocolRegex.protocolMatches(_protocol));
+        require(NameRegex.nameMatches(_name), "Name mismatch");
+        // TODO check name is available
+        require(_name.toSlice().len() >= protocolEntry.nameMinLength, "Name length incorrect");
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
 
@@ -224,7 +251,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         if (!isAllowed(_protocol, now)) {
             return Mode.NotYetAvailable;
         } else if (now < entry.registrationDate) {
-            if (now < entry.registrationDate - revealPeriod) {
+            if (now < (entry.registrationDate - protocolEntry.revealPeriod)) {
                 return Mode.Auction;
             } else {
                 return Mode.Reveal;
@@ -260,10 +287,30 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
      * @param _protocol The hash to start an auction on
      */
     function getAllowedTime(string _protocol) public view returns (uint) {
-        return _registryStartDate[_protocol];
+        ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
+        require(protocolEntry.available == true);
+        return protocolEntry.registryStartDate;
     }
 
-    function setRegistryStartDate(string _protocol, uint registryStartDate) external onlyOwner {
-        _registryStartDate[_protocol] = registryStartDate;
+    function setProtocolEntry(string _protocol, uint registryStartDate, uint32 totalAuctionLength, uint32 revealPeriod, uint32 nameMaxLength, uint32 nameMinLength, uint minPrice, bool available) external onlyOwner {
+        ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
+        protocolEntry.registryStartDate = registryStartDate;
+        protocolEntry.totalAuctionLength = totalAuctionLength;
+        protocolEntry.revealPeriod = revealPeriod;
+        protocolEntry.nameMaxLength = nameMaxLength;
+        protocolEntry.nameMinLength = nameMinLength;
+        protocolEntry.minPrice = minPrice;
+        protocolEntry.available = available;
+    }
+
+    function protocolEntries(string _protocol) external view returns (uint, uint32, uint32, uint32, uint32, uint, bool) {
+        require(_protocol.toSlice().len() > 0);
+        require(ProtocolRegex.protocolMatches(_protocol));
+        ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
+        return (protocolEntry.registryStartDate, protocolEntry.totalAuctionLength, protocolEntry.revealPeriod, protocolEntry.nameMaxLength, protocolEntry.nameMinLength, protocolEntry.minPrice, protocolEntry.available);
+    }
+
+    function getNow() public returns (uint) {
+        return now;
     }
 }
