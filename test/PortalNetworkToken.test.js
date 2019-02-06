@@ -85,7 +85,7 @@ contract('Portal Network Token', function (accounts) {
         let PRT = await PortalNetworkToken.deployed();
         let prtAccrueAddr = await PRT.prtAccrueAddr.call();
         assert.equal(prtAccrueAddr.toString().toLowerCase(), '0x000000000000000000000000000000000000dead', 'PRT accrue address isn\'t correct');
-        await PRT.upgradePRTAccure('0x0000000000000000000000000000000000000001', {from: accounts[0]});
+        await PRT.upgradePRTAccrue('0x0000000000000000000000000000000000000001', {from: accounts[0]});
         prtAccrueAddr = await PRT.prtAccrueAddr.call();
         
         assert.equal(prtAccrueAddr, '0x0000000000000000000000000000000000000001', 'PRT accrue address isn\'t correct');

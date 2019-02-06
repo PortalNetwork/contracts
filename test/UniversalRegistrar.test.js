@@ -17,24 +17,28 @@ contract('UniversalRegistrar', function (accounts) {
       try {
         let universalRegistrar = await UniversalRegistrar.deployed();
 
-        //let now = 1549344525;
-        //console.log('now', now);
+        const now = 1549344525;
+        const totalAuctionLength = 60; // 432000; // (5 days)
+        const revealPeriod = 30; // 172800; // (48 hours)
+        const nameMaxLength = 10;
+        const nameMinLength = 6;
+        const minPrice = "1000000000000000000";
 
         //let nowTime = await universalRegistrar.getNow.call();
         //console.log('nowTime', (new BN(nowTime, 16)).toString(10));
         
         //                                                             5 days  48 hours
         //await universalRegistrar.setProtocolEntry('etc', 1549344525, 432000,   172800, 10, 6, "1000000000000000000", {from: accounts[0]});
-        await universalRegistrar.setProtocolEntry('etc', 1549344525, 60, 30, 10, 6, "1000000000000000000", {from: accounts[0]});
+        await universalRegistrar.setProtocolEntry('etc', now, totalAuctionLength, revealPeriod, nameMaxLength, nameMinLength, "1000000000000000000", {from: accounts[0]});
         let allowedTime = await universalRegistrar.getAllowedTime('etc');
         assert.equal(allowedTime, now, 'allowedTime isn\'t correct');
 
         let protocolEntry = await universalRegistrar.protocolEntries('etc');
-        assert.equal(protocolEntry[1].toNumber(), 432000, 'protocolEntry.totalAuctionLength isn\'t correct');
-        assert.equal(protocolEntry[2].toNumber(), 172800, 'protocolEntry.revealPeriod isn\'t correct');
-        assert.equal(protocolEntry[3].toNumber(), 10 , 'protocolEntry.nameMaxLength isn\'t correct');
-        assert.equal(protocolEntry[4].toNumber(), 6 , 'protocolEntry.nameMinLength isn\'t correct');
-        assert.equal((new BN(protocolEntry[5], 16)).toString(10), "1000000000000000000", 'protocolEntry.minPrice isn\'t correct');
+        assert.equal(protocolEntry[1].toNumber(), totalAuctionLength, 'protocolEntry.totalAuctionLength isn\'t correct');
+        assert.equal(protocolEntry[2].toNumber(), revealPeriod, 'protocolEntry.revealPeriod isn\'t correct');
+        assert.equal(protocolEntry[3].toNumber(), nameMaxLength, 'protocolEntry.nameMaxLength isn\'t correct');
+        assert.equal(protocolEntry[4].toNumber(), nameMinLength, 'protocolEntry.nameMinLength isn\'t correct');
+        assert.equal((new BN(protocolEntry[5], 16)).toString(10), minPrice, 'protocolEntry.minPrice isn\'t correct');
         assert.equal(protocolEntry[6], true, 'protocolEntry.available isn\'t correct');
         
         let isAllowed = await universalRegistrar.isAllowed('etc', new Date().getTime());

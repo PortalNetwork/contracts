@@ -171,14 +171,9 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         
         // TODO update UniversalRegistry
         registry.setRegistrant(_name, _protocol, msg.sender);
-
-        uint _value = protocolEntry.minPrice;
-        // TODO adjust value with vickrey auction rule
-        if (entry.value > protocolEntry.minPrice) {
-            _value = entry.value;
-        }
+        
         // TODO lock PRT
-        portalNetworkToken.transferWithMetadata(entry.owner, _value, entry.name, entry.protocol, entry.registrationDate);
+        portalNetworkToken.transferWithMetadata(entry.owner, (entry.value > protocolEntry.minPrice) ? entry.value : protocolEntry.minPrice, entry.name, entry.protocol, entry.registrationDate);
 
         // TODO emit event
         emit BidFinalized(msg.sender, _name, _protocol, entry.highestBid, now);
