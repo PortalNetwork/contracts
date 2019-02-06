@@ -91,6 +91,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         Entry storage entry = _entries[bns];
         if (entry.registrationDate == 0) {
             entry.registrationDate = now + protocolEntry.totalAuctionLength;
+            entry.owner = address(0x0);
             entry.name = _name;
             entry.protocol = _protocol;
             entry.value = 0;
@@ -133,7 +134,11 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
 
             // TODO refund the highestBid to entry.owner, update highestBid to value
             // TODO success bid, and transfer token to pending pool
-
+            if (entry.owner != address(0x0) && entry.highestBid > 0) {
+                portalNetworkToken.transferBackToOwner(entry.owner, entry.highestBid);
+            }
+            portalNetworkToken.transferToAuctionPool(msg.sender, _value);
+            
             // TODO switch msg.sender to entry.owner, and update highestBid
             entry.owner = msg.sender;
             entry.value = entry.highestBid;
@@ -163,12 +168,17 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         string memory bns = _name.toSlice().concat(protocol.toSlice());
         Entry storage entry = _entries[bns];
         require(entry.owner == msg.sender);
-            
-        entry.registrationDate = now;
+        
         // TODO update UniversalRegistry
         registry.setRegistrant(_name, _protocol, msg.sender);
 
+        uint _value = protocolEntry.minPrice;
+        // TODO adjust value with vickrey auction rule
+        if (entry.value > protocolEntry.minPrice) {
+            _value = entry.value;
+        }
         // TODO lock PRT
+        portalNetworkToken.transferWithMetadata(entry.owner, _value, entry.name, entry.protocol, entry.registrationDate);
 
         // TODO emit event
         emit BidFinalized(msg.sender, _name, _protocol, entry.highestBid, now);

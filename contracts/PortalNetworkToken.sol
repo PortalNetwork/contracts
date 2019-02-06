@@ -134,7 +134,8 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
         string _protocol, 
         uint _registrationDate
     ) internal {
-        balances[_from] = balances[_from].sub(_value);
+        // TODO finalize and move the Token from AuctionPool address to PRTAccrue address
+        balances[auctionPoolAddr] = balances[auctionPoolAddr].sub(_value);
         balances[prtAccrueAddr] = balances[prtAccrueAddr].add(_value);
 
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
