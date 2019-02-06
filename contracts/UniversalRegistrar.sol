@@ -40,9 +40,10 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
     event BidRevealed(address indexed owner, string name, string protocol, uint value, uint8 status);
     event BidFinalized(address indexed owner, string name, string protocol, uint value, uint registrationDate);
     event Transfer(address indexed owner, address indexed newOwner, string name, string protocol);
+    event UpdatePortalNetworkToken(address portalNetworkTokenAddress);
 
     Registry registry;
-    PortalNetworkToken portalNetworkToken;
+    PortalNetworkToken public portalNetworkToken;
 
     constructor(Registry registryAddr) public {
         registry = registryAddr;
@@ -60,6 +61,16 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         string memory bns = _name.toSlice().concat(protocol.toSlice());
         require(state(_name, _protocol) == Mode.Owned && msg.sender == _entries[bns].owner);
         _;
+    }
+
+    function updatePortalNetworkTokenAddress(PortalNetworkToken _portalNetworkToken) external onlyOwner {
+        require(_portalNetworkToken != address(0));
+        require(_portalNetworkToken != address(this));
+        require(_portalNetworkToken != portalNetworkToken);
+
+        portalNetworkToken = _portalNetworkToken;
+
+        emit UpdatePortalNetworkToken(_portalNetworkToken);
     }
 
     // TODO startAuction
@@ -106,26 +117,26 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
     }
 
     // TODO revealAuction
-    function revealAction(string _name, string _protocol, uint _value, bytes32 _salt) external {
-        require(_protocol.toSlice().len() > 0);
-        require(ProtocolRegex.protocolMatches(_protocol));
+    function revealAuction(string _name, string _protocol, uint _value, bytes32 _salt) external {
+        require(_protocol.toSlice().len() > 0, "Protocol length incorrect");
+        require(ProtocolRegex.protocolMatches(_protocol), "Protocol mismatch");
         ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
-        require(protocolEntry.available == true);
+        require(protocolEntry.available == true, "Protocol is not availalbe");
         // TODO check protocol is available
-        require(NameRegex.nameMatches(_name));
+        require(NameRegex.nameMatches(_name), "Name mismatch");
         // TODO check name is available
-        require(_name.toSlice().len() >= protocolEntry.nameMinLength);
+        require(_name.toSlice().len() >= protocolEntry.nameMinLength, "Name length incorrect");
         Mode mode = state(_name, _protocol);
-        require(mode == Mode.Reveal);
+        require(mode == Mode.Reveal, "Mode incorrect");
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
         bytes32 tempSealedBid = sealedBids[msg.sender][bns];
         // TODO check salt and information is correct
-        require(shaBid(_name, _protocol, _value, _salt) == tempSealedBid);
+        require(shaBid(_name, _protocol, _value, _salt) == tempSealedBid, "shaBid is not the same");
         
         // TODO need check over minimun price
-        require(_value >= protocolEntry.minPrice);
-        require(portalNetworkToken.balanceOf(msg.sender) >= _value);
+        require(_value >= protocolEntry.minPrice, "Bid value is lower then minimum price");
+        require(portalNetworkToken.balanceOf(msg.sender) >= _value, "Bidder's PRT is no enough");
 
         // TODO compare with other data where the bid is the highest bid
         Entry storage entry = _entries[bns];
@@ -303,9 +314,5 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         require(ProtocolRegex.protocolMatches(_protocol));
         ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
         return (protocolEntry.registryStartDate, protocolEntry.totalAuctionLength, protocolEntry.revealPeriod, protocolEntry.nameMaxLength, protocolEntry.nameMinLength, protocolEntry.minPrice, protocolEntry.available);
-    }
-
-    function getNow() public returns (uint) {
-        return now;
     }
 }
