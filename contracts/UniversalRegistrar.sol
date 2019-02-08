@@ -194,22 +194,22 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
      * @param _protocol Protocol of BNS
      */
     function finalizeAuction(string _name, string _protocol) external onlyBnsOwner(_name, _protocol) {
-        require(_protocol.toSlice().len() > 0, "Protocol length incorrect");
-        require(ProtocolRegex.protocolMatches(_protocol), "Protocol mismatch");
-        ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
-        require(protocolEntry.available == true, "Protocol is not availalbe");
-        // TODO check protocol is available
-        require(NameRegex.nameMatches(_name), "Name mismatch");
-        // TODO check name is available
-        require(_name.toSlice().len() >= protocolEntry.nameMinLength, "Name length incorrect");
         // TODO check name + protocol Mode is available
         Mode mode = state(_name, _protocol);
-        require(mode != Mode.Owned, "Mode incorrect");
+        require(mode == Mode.Owned, "Mode incorrect");
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
         Entry storage entry = _entries[bns];
+        ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
         require(entry.owner == msg.sender, "sender is not the BNS owner");
         
+        // TODO if the bidder is the only one then refund by vickrey rule
+        if (entry.value == 0) {
+            portalNetworkToken.transferBackToOwner(entry.owner, entry.highestBid - protocolEntry.minPrice);
+        } else if (entry.value > 0 && entry.highestBid > entry.value) {
+            portalNetworkToken.transferBackToOwner(entry.owner, entry.highestBid - entry.value);
+        }
+
         // TODO We do lock PRT first before register to registry
         portalNetworkToken.transferWithMetadata(
             entry.owner, 
@@ -220,7 +220,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         );
 
         // TODO update UniversalRegistry
-        registry.setRegistrant(_name, _protocol, msg.sender);
+        //registry.setRegistrant(_name, _protocol, msg.sender);
 
         // TODO emit event
         emit BidFinalized(msg.sender, _name, _protocol, entry.highestBid, now);
