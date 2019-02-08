@@ -51,15 +51,15 @@ contract('Portal Network Token', function (accounts) {
       }
     });
 
-    it.skip('token transfer', async () => {
+    it('token transfer', async () => {
       try {
         let PRT = await PortalNetworkToken.deployed();
 
         accounts.forEach(async (address) => {
           if (address !== accounts[0]){
-            await PRT.transfer(address, 1000000000000000000, {from: accounts[0]});
+            await PRT.transfer(address, "10000000000000000000", {from: accounts[0]});
             let balance = await PRT.balanceOf.call(address);
-            assert.equal(balance.toNumber(), 1000000000000000000, 'balance isn\'t correct');
+            assert.equal((new BN(balance, 16)).toString(10), "10000000000000000000", 'balance isn\'t correct');
           }
         })
       } catch (err) {
