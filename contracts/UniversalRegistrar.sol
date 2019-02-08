@@ -63,6 +63,11 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         _;
     }
 
+    /**
+     * @dev Update the PortalNetworkToken address
+     *
+     * @param _portalNetworkToken The PortalNetworkToken address
+     */
     function updatePortalNetworkTokenAddress(PortalNetworkToken _portalNetworkToken) external onlyOwner {
         require(_portalNetworkToken != address(0));
         require(_portalNetworkToken != address(this));
@@ -73,12 +78,24 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         emit UpdatePortalNetworkToken(_portalNetworkToken);
     }
 
-    // TODO startAuction
+    /**
+     * @dev Start an auction of the BNS
+     *
+     * @param _name Name of BNS
+     * @param _protocol Protocol of BNS
+     * @param _sealedBid Sealed bid of the bidding BNS
+     */
     function startAuction(string _name, string _protocol, bytes32 _sealedBid) external {
         _startAuction(_name, _protocol, _sealedBid);
     }
 
-    // TODO _startAuction internal
+    /**
+     * @dev The internal function of start an auction of the BNS
+     *
+     * @param _name Name of BNS
+     * @param _protocol Protocol of BNS
+     * @param _sealedBid Sealed bid of the bidding BNS
+     */
     function _startAuction(string _name, string _protocol, bytes32 _sealedBid) internal {
         require(_protocol.toSlice().len() > 0, "Protocol length incorrect");
         require(ProtocolRegex.protocolMatches(_protocol), "Protocol mismatch");
@@ -116,7 +133,14 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         emit NewBid(msg.sender, _name, _protocol);
     }
 
-    // TODO revealAuction
+    /**
+     * @dev Reveal an auction of the BNS
+     *
+     * @param _name Name of BNS
+     * @param _protocol Protocol of BNS
+     * @param _value The bid amount of BNS
+     * @param _salt The salt of the sealed bid
+     */
     function revealAuction(string _name, string _protocol, uint _value, bytes32 _salt) external {
         require(_protocol.toSlice().len() > 0, "Protocol length incorrect");
         require(ProtocolRegex.protocolMatches(_protocol), "Protocol mismatch");
@@ -162,7 +186,12 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         }
     }
 
-    // TODO finalizeAuction
+    /**
+     * @dev Finalize an auction of the BNS
+     *
+     * @param _name Name of BNS
+     * @param _protocol Protocol of BNS
+     */
     function finalizeAuction(string _name, string _protocol) external onlyBnsOwner(_name, _protocol) {
         require(_protocol.toSlice().len() > 0);
         require(ProtocolRegex.protocolMatches(_protocol));
@@ -197,8 +226,8 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
     /**
      * @dev The owner of a domain may transfer it to someone else at any time.
      *
-     * @param _name BNS name
-     * @param _protocol BNS protocol
+     * @param _name Name of BNS
+     * @param _protocol Protocol of BNS
      * @param newOwner The address to transfer ownership to
      */
     function transfer(string _name, string _protocol, address newOwner) external onlyBnsOwner(_name, _protocol) {
@@ -219,7 +248,13 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         emit Transfer(currentOwner, newOwner, _name, _protocol);
     }
 
-    // TODO entries (status check)
+    
+    /**
+     * @dev Get the entries of the BNS
+     * 
+     * @param _name Name of BNS
+     * @param _protocol Protocol of BNS
+     */
     function entries(string _name, string _protocol) external view returns (Mode, string, string, uint, uint, uint) {
         // TODO check name is available
         require(_name.toSlice().len() > 0);
@@ -298,7 +333,28 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         return protocolEntry.registryStartDate;
     }
 
-    function setProtocolEntry(string _protocol, uint registryStartDate, uint32 totalAuctionLength, uint32 revealPeriod, uint32 nameMaxLength, uint32 nameMinLength, uint minPrice, bool available) external onlyOwner {
+    /**
+     * @dev Set Protocol information
+     * 
+     * @param _protocol Protocol of BNS
+     * @param registryStartDate Protocol registry start date
+     * @param totalAuctionLength Protocol total auction length
+     * @param revealPeriod Protocol reveal period
+     * @param nameMaxLength The BNS name max length
+     * @param nameMinLength The BNS name min length
+     * @param minPrice The min bidding price of BNS
+     * @param available Is the protocol available
+     */
+    function setProtocolEntry(
+        string _protocol, 
+        uint registryStartDate, 
+        uint32 totalAuctionLength, 
+        uint32 revealPeriod, 
+        uint32 nameMaxLength, 
+        uint32 nameMinLength, 
+        uint minPrice, 
+        bool available
+    ) external onlyOwner {
         ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
         protocolEntry.registryStartDate = registryStartDate;
         protocolEntry.totalAuctionLength = totalAuctionLength;
@@ -309,10 +365,23 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         protocolEntry.available = available;
     }
 
+    /**
+     * @dev Get the protocol entries
+     *
+     * @param _protocol Protocol of BNS
+     */
     function protocolEntries(string _protocol) external view returns (uint, uint32, uint32, uint32, uint32, uint, bool) {
         require(_protocol.toSlice().len() > 0);
         require(ProtocolRegex.protocolMatches(_protocol));
         ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
-        return (protocolEntry.registryStartDate, protocolEntry.totalAuctionLength, protocolEntry.revealPeriod, protocolEntry.nameMaxLength, protocolEntry.nameMinLength, protocolEntry.minPrice, protocolEntry.available);
+        return (
+            protocolEntry.registryStartDate, 
+            protocolEntry.totalAuctionLength, 
+            protocolEntry.revealPeriod, 
+            protocolEntry.nameMaxLength, 
+            protocolEntry.nameMinLength, 
+            protocolEntry.minPrice, 
+            protocolEntry.available
+        );
     }
 }
