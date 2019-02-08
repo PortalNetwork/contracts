@@ -49,7 +49,7 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
      * Only available for the UniversalRegistrar contract
      */
     modifier onlyUniversalRegistrar() {
-        require(msg.sender == address(universalRegistrarAddr));
+        require(msg.sender == address(universalRegistrarAddr), "sender is not UniversalRegistrar");
         _;
     }
 
@@ -59,8 +59,8 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
      * @param _from The from address who need to lock the RPT
      * @param _value The tokne of the bidding price
      */
-    function transferToAuctionPool(address _from, uint256 _value) external onlyUniversalRegistrar {
-        _transferToAuctionPool(_from, _value);
+    function transferToAuctionPool(address _from, uint256 _value) external onlyUniversalRegistrar returns (bool) {
+        return _transferToAuctionPool(_from, _value);
     }
 
     /**
@@ -69,11 +69,13 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
      * @param _from The from address who need to lock the RPT
      * @param _value The token of the bidding price
      */
-    function _transferToAuctionPool(address _from, uint256 _value) internal {
-        require(_value > 0);
-        require(balances[_from] >= _value);
+    function _transferToAuctionPool(address _from, uint256 _value) internal returns (bool) {
+        if (!(_value > 0) || !(balances[_from] >= _value)) {
+            return false;
+        }
         balances[_from] = balances[_from].sub(_value);
         balances[auctionPoolAddr] = balances[auctionPoolAddr].add(_value);
+        return true;
     }
 
     /**
@@ -82,8 +84,8 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
      * @param _to The address of the origin sender
      * @param _value The token of the origin amount
      */
-    function transferBackToOwner(address _to, uint256 _value) external onlyUniversalRegistrar {
-        _transferBackToOwner(_to, _value);
+    function transferBackToOwner(address _to, uint256 _value) external onlyUniversalRegistrar returns (bool) {
+        return _transferBackToOwner(_to, _value);
     }
 
     /**
@@ -92,11 +94,13 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
      * @param _to The address of the origin sender
      * @param _value The token of the origin amount
      */
-    function _transferBackToOwner(address _to, uint256 _value) internal {
-        require(_value > 0);
-        require(balances[auctionPoolAddr] >= _value);
+    function _transferBackToOwner(address _to, uint256 _value) internal returns (bool) {
+        if (!(_value > 0) || !(balances[auctionPoolAddr] >= _value)) {
+            return false;
+        }
         balances[auctionPoolAddr] = balances[auctionPoolAddr].sub(_value);
         balances[_to] = balances[_to].add(_value);
+        return true;
     }
     
     /**
@@ -114,8 +118,8 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
         string _name, 
         string _protocol, 
         uint _registrationDate
-    ) external onlyUniversalRegistrar {
-        _transferWithMetadata(_from, _value, _name, _protocol, _registrationDate);
+    ) external onlyUniversalRegistrar returns (bool) {
+        return _transferWithMetadata(_from, _value, _name, _protocol, _registrationDate);
     }
 
     /**
@@ -133,7 +137,7 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
         string _name, 
         string _protocol, 
         uint _registrationDate
-    ) internal {
+    ) internal returns (bool) {
         // TODO finalize and move the Token from AuctionPool address to PRTAccrue address
         balances[auctionPoolAddr] = balances[auctionPoolAddr].sub(_value);
         balances[prtAccrueAddr] = balances[prtAccrueAddr].add(_value);
@@ -152,6 +156,7 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
 
         emit Transfer(_from, prtAccrueAddr, _value);
         emit PRTAccrue(_from, _name, _protocol, _registrationDate, _expireDate, _value);
+        return true;
     }
 
     /**
@@ -173,9 +178,9 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
      * @param _newPRTAccrue new PRT accrue address
      */
     function upgradePRTAccrue(address _newPRTAccrue) external onlyOwner {
-        require(_newPRTAccrue != address(0));
-        require(_newPRTAccrue != address(this));
-        require(_newPRTAccrue != prtAccrueAddr);
+        require(_newPRTAccrue != address(0), "PRTAccrue address can not be 0");
+        require(_newPRTAccrue != address(this), "PRTAccrue address can not as same as PortalNetworkToken address");
+        require(_newPRTAccrue != prtAccrueAddr, "PRTAccrue address is as same as current address");
 
         prtAccrueAddr = _newPRTAccrue;
 
@@ -188,9 +193,9 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
      * @param _newUniversalRegistrar New UniversalRegistrar address
      */
     function upgradeUniversalRegistrar(address _newUniversalRegistrar) external onlyOwner {
-        require(_newUniversalRegistrar != address(0));
-        require(_newUniversalRegistrar != address(this));
-        require(_newUniversalRegistrar != universalRegistrarAddr);
+        require(_newUniversalRegistrar != address(0), "UniversalRegistrar address can not be 0");
+        require(_newUniversalRegistrar != address(this), "UniversalRegistrar address can not as same as PortalNetworkToken address");
+        require(_newUniversalRegistrar != universalRegistrarAddr, "UniversalRegistrar address is as same as current address");
 
         universalRegistrarAddr = _newUniversalRegistrar;
 
@@ -203,9 +208,9 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
      * @param _newAuctionPool New auction pool address
      */
     function upgradeAuctionPool(address _newAuctionPool) external onlyOwner {
-        require(_newAuctionPool != address(0));
-        require(_newAuctionPool != address(this));
-        require(_newAuctionPool != auctionPoolAddr);
+        require(_newAuctionPool != address(0), "AuctionPool address can not be 0");
+        require(_newAuctionPool != address(this), "AuctionPool address can not as same as PortalNetworkToken address");
+        require(_newAuctionPool != auctionPoolAddr, "AuctionPool address is as same as current address");
 
         auctionPoolAddr = _newAuctionPool;
 

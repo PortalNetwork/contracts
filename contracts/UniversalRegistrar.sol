@@ -51,7 +51,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
 
     // Check the state
     modifier inState(string _name, string _protocol, Mode _state) {
-        require(state(_name, _protocol) == _state);
+        require(state(_name, _protocol) == _state, "state is different");
         _;
     }
 
@@ -59,26 +59,43 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         // TODO check the domain owner, msg.sender is the highest bidder
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
-        require(state(_name, _protocol) == Mode.Owned && msg.sender == _entries[bns].owner);
+        require(state(_name, _protocol) == Mode.Owned && msg.sender == _entries[bns].owner, "state is not Owned or sender is not BNS owner");
         _;
     }
 
+    /**
+     * @dev Update the PortalNetworkToken address
+     *
+     * @param _portalNetworkToken The PortalNetworkToken address
+     */
     function updatePortalNetworkTokenAddress(PortalNetworkToken _portalNetworkToken) external onlyOwner {
-        require(_portalNetworkToken != address(0));
-        require(_portalNetworkToken != address(this));
-        require(_portalNetworkToken != portalNetworkToken);
+        require(_portalNetworkToken != address(0), "PortalNetworkToken address can not set 0x0");
+        require(_portalNetworkToken != address(this), "PortalNetworkToken address can not be the same as UniversalRegistrar");
+        require(_portalNetworkToken != portalNetworkToken, "PortalNetworkToken address is the same as current address");
 
         portalNetworkToken = _portalNetworkToken;
 
         emit UpdatePortalNetworkToken(_portalNetworkToken);
     }
 
-    // TODO startAuction
+    /**
+     * @dev Start an auction of the BNS
+     *
+     * @param _name Name of BNS
+     * @param _protocol Protocol of BNS
+     * @param _sealedBid Sealed bid of the bidding BNS
+     */
     function startAuction(string _name, string _protocol, bytes32 _sealedBid) external {
         _startAuction(_name, _protocol, _sealedBid);
     }
 
-    // TODO _startAuction internal
+    /**
+     * @dev The internal function of start an auction of the BNS
+     *
+     * @param _name Name of BNS
+     * @param _protocol Protocol of BNS
+     * @param _sealedBid Sealed bid of the bidding BNS
+     */
     function _startAuction(string _name, string _protocol, bytes32 _sealedBid) internal {
         require(_protocol.toSlice().len() > 0, "Protocol length incorrect");
         require(ProtocolRegex.protocolMatches(_protocol), "Protocol mismatch");
@@ -102,7 +119,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         Entry storage entry = _entries[bns];
         if (entry.registrationDate == 0) {
             entry.registrationDate = now + protocolEntry.totalAuctionLength;
-            entry.owner = address(0x0);
+            entry.owner = address(0);
             entry.name = _name;
             entry.protocol = _protocol;
             entry.value = 0;
@@ -116,7 +133,14 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         emit NewBid(msg.sender, _name, _protocol);
     }
 
-    // TODO revealAuction
+    /**
+     * @dev Reveal an auction of the BNS
+     *
+     * @param _name Name of BNS
+     * @param _protocol Protocol of BNS
+     * @param _value The bid amount of BNS
+     * @param _salt The salt of the sealed bid
+     */
     function revealAuction(string _name, string _protocol, uint _value, bytes32 _salt) external {
         require(_protocol.toSlice().len() > 0, "Protocol length incorrect");
         require(ProtocolRegex.protocolMatches(_protocol), "Protocol mismatch");
@@ -143,12 +167,13 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         if (entry.highestBid < _value) {
             // New winner
 
-            // TODO refund the highestBid to entry.owner, update highestBid to value
-            // TODO success bid, and transfer token to pending pool
-            if (entry.owner != address(0x0) && entry.highestBid > 0) {
+            // TODO We do lock PRT first and then move the PRT token of new highest bidder to AuctionPool
+            if (!portalNetworkToken.transferToAuctionPool(msg.sender, _value)) {
+                return;
+            }
+            if (entry.owner != address(0) && entry.highestBid > 0) {
                 portalNetworkToken.transferBackToOwner(entry.owner, entry.highestBid);
             }
-            portalNetworkToken.transferToAuctionPool(msg.sender, _value);
             
             // TODO switch msg.sender to entry.owner, and update highestBid
             entry.owner = msg.sender;
@@ -162,29 +187,40 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         }
     }
 
-    // TODO finalizeAuction
+    /**
+     * @dev Finalize an auction of the BNS
+     *
+     * @param _name Name of BNS
+     * @param _protocol Protocol of BNS
+     */
     function finalizeAuction(string _name, string _protocol) external onlyBnsOwner(_name, _protocol) {
-        require(_protocol.toSlice().len() > 0);
-        require(ProtocolRegex.protocolMatches(_protocol));
+        require(_protocol.toSlice().len() > 0, "Protocol length incorrect");
+        require(ProtocolRegex.protocolMatches(_protocol), "Protocol mismatch");
         ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
-        require(protocolEntry.available == true);
+        require(protocolEntry.available == true, "Protocol is not availalbe");
         // TODO check protocol is available
-        require(NameRegex.nameMatches(_name));
+        require(NameRegex.nameMatches(_name), "Name mismatch");
         // TODO check name is available
-        require(_name.toSlice().len() >= protocolEntry.nameMinLength);
+        require(_name.toSlice().len() >= protocolEntry.nameMinLength, "Name length incorrect");
         // TODO check name + protocol Mode is available
         Mode mode = state(_name, _protocol);
-        require(mode != Mode.Owned);
+        require(mode != Mode.Owned, "Mode incorrect");
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
         Entry storage entry = _entries[bns];
-        require(entry.owner == msg.sender);
+        require(entry.owner == msg.sender, "sender is not the BNS owner");
         
+        // TODO We do lock PRT first before register to registry
+        portalNetworkToken.transferWithMetadata(
+            entry.owner, 
+            (entry.value > protocolEntry.minPrice) ? entry.value : protocolEntry.minPrice, 
+            entry.name, 
+            entry.protocol, 
+            entry.registrationDate
+        );
+
         // TODO update UniversalRegistry
         registry.setRegistrant(_name, _protocol, msg.sender);
-        
-        // TODO lock PRT
-        portalNetworkToken.transferWithMetadata(entry.owner, (entry.value > protocolEntry.minPrice) ? entry.value : protocolEntry.minPrice, entry.name, entry.protocol, entry.registrationDate);
 
         // TODO emit event
         emit BidFinalized(msg.sender, _name, _protocol, entry.highestBid, now);
@@ -197,18 +233,17 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
     /**
      * @dev The owner of a domain may transfer it to someone else at any time.
      *
-     * @param _name BNS name
-     * @param _protocol BNS protocol
+     * @param _name Name of BNS
+     * @param _protocol Protocol of BNS
      * @param newOwner The address to transfer ownership to
      */
     function transfer(string _name, string _protocol, address newOwner) external onlyBnsOwner(_name, _protocol) {
-        require(newOwner != address(0x0));
         // TODO check name is available
-        require(_name.toSlice().len() > 0);
+        require(_name.toSlice().len() > 0, "Name length incorrect");
         // TODO check protocol is available
-        require(_protocol.toSlice().len() > 0);
-        require(NameRegex.nameMatches(_name));
-        require(ProtocolRegex.protocolMatches(_protocol));
+        require(_protocol.toSlice().len() > 0, "Protocol length incorrect");
+        require(NameRegex.nameMatches(_name), "Name mismatch");
+        require(ProtocolRegex.protocolMatches(_protocol), "Protocol mismatch");
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
         Entry storage entry = _entries[bns];
@@ -219,14 +254,20 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         emit Transfer(currentOwner, newOwner, _name, _protocol);
     }
 
-    // TODO entries (status check)
+    
+    /**
+     * @dev Get the entries of the BNS
+     * 
+     * @param _name Name of BNS
+     * @param _protocol Protocol of BNS
+     */
     function entries(string _name, string _protocol) external view returns (Mode, string, string, uint, uint, uint) {
         // TODO check name is available
-        require(_name.toSlice().len() > 0);
+        require(_name.toSlice().len() > 0, "Name length incorrect");
         // TODO check protocol is available
-        require(_protocol.toSlice().len() > 0);
-        require(NameRegex.nameMatches(_name));
-        require(ProtocolRegex.protocolMatches(_protocol));
+        require(_protocol.toSlice().len() > 0, "Protocol length incorrect");
+        require(NameRegex.nameMatches(_name), "Name mismatch");
+        require(ProtocolRegex.protocolMatches(_protocol), "Protocol mismatch");
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
 
@@ -294,11 +335,32 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
      */
     function getAllowedTime(string _protocol) public view returns (uint) {
         ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
-        require(protocolEntry.available == true);
+        require(protocolEntry.available == true, "Protocol is not available");
         return protocolEntry.registryStartDate;
     }
 
-    function setProtocolEntry(string _protocol, uint registryStartDate, uint32 totalAuctionLength, uint32 revealPeriod, uint32 nameMaxLength, uint32 nameMinLength, uint minPrice, bool available) external onlyOwner {
+    /**
+     * @dev Set Protocol information
+     * 
+     * @param _protocol Protocol of BNS
+     * @param registryStartDate Protocol registry start date
+     * @param totalAuctionLength Protocol total auction length
+     * @param revealPeriod Protocol reveal period
+     * @param nameMaxLength The BNS name max length
+     * @param nameMinLength The BNS name min length
+     * @param minPrice The min bidding price of BNS
+     * @param available Is the protocol available
+     */
+    function setProtocolEntry(
+        string _protocol, 
+        uint registryStartDate, 
+        uint32 totalAuctionLength, 
+        uint32 revealPeriod, 
+        uint32 nameMaxLength, 
+        uint32 nameMinLength, 
+        uint minPrice, 
+        bool available
+    ) external onlyOwner {
         ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
         protocolEntry.registryStartDate = registryStartDate;
         protocolEntry.totalAuctionLength = totalAuctionLength;
@@ -309,10 +371,23 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         protocolEntry.available = available;
     }
 
+    /**
+     * @dev Get the protocol entries
+     *
+     * @param _protocol Protocol of BNS
+     */
     function protocolEntries(string _protocol) external view returns (uint, uint32, uint32, uint32, uint32, uint, bool) {
-        require(_protocol.toSlice().len() > 0);
-        require(ProtocolRegex.protocolMatches(_protocol));
+        require(_protocol.toSlice().len() > 0, "Protocol length incorrect");
+        require(ProtocolRegex.protocolMatches(_protocol), "Protocol mismatch");
         ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
-        return (protocolEntry.registryStartDate, protocolEntry.totalAuctionLength, protocolEntry.revealPeriod, protocolEntry.nameMaxLength, protocolEntry.nameMinLength, protocolEntry.minPrice, protocolEntry.available);
+        return (
+            protocolEntry.registryStartDate, 
+            protocolEntry.totalAuctionLength, 
+            protocolEntry.revealPeriod, 
+            protocolEntry.nameMaxLength, 
+            protocolEntry.nameMinLength, 
+            protocolEntry.minPrice, 
+            protocolEntry.available
+        );
     }
 }
