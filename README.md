@@ -18,8 +18,13 @@ An ERC20 standard token, built using the [OpenZeppelin](https://github.com/OpenZ
 - Total Supply: 4000000000
 
 ### Universal Registrar
+Universal Registrar contract is to register a blockchain name service, it using Vickrey auction with the bidding flow.
+
+#### Vickrey Auction
+With Universal Registrar, is implement the secret auction with Portal Network Token contract, the Portal Network Token contract is the pool for check the bidding price, and it can be check at reveal period, this action wont expose the real bid price of the sealed bid.
 
 ### Universal Registry
+Universal Registry is to set the blockchain name service owner, ttl and subdomain.
 
 ## Development
 
