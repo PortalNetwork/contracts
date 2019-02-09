@@ -47,7 +47,7 @@ contract('UniversalRegistrar', function (accounts) {
       }
     });
 
-    it('state', async () => {
+    it('state available', async () => {
       try {
         let universalRegistrar = await UniversalRegistrar.deployed();
         const name = 'welcome';
@@ -58,6 +58,23 @@ contract('UniversalRegistrar', function (accounts) {
 
         let mode = await universalRegistrar.state(name, protocol);
         assert.equal(new BN(mode, 16).toString(10), "0");
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
+    it('state not yet available', async () => {
+      try {
+        let universalRegistrar = await UniversalRegistrar.deployed();
+        const protocol = 'etc';
+        
+        const name2 = 'wordistoolong';  // too long
+        let mode2 = await universalRegistrar.state(name2, protocol);
+        assert.equal(new BN(mode2, 16).toString(10), "5");
+
+        const name3 = 'a';  // too short
+        let mode3  = await universalRegistrar.state(name3, protocol);
+        assert.equal(new BN(mode3, 16).toString(10), "5");
       } catch (err) {
         console.log(err);
       }
@@ -110,9 +127,13 @@ contract('UniversalRegistrar', function (accounts) {
         const name = 'welcome';
         const protocol = 'etc';
 
-        const shaBid = await universalRegistrar.shaBid(name, protocol, "2000000000000000000", web3.utils.sha3("secret"));
-        const startAuction2 = await universalRegistrar.startAuction(name, protocol, shaBid, {from: accounts[1]});
+        const shaBid1 = await universalRegistrar.shaBid(name, protocol, "2000000000000000000", web3.utils.sha3("secret"));
+        const startAuction2 = await universalRegistrar.startAuction(name, protocol, shaBid1, {from: accounts[1]});
         assert.equal(startAuction2.receipt.status, true);
+
+        const shaBid2 = await universalRegistrar.shaBid(name, protocol, "1000000000000000000", web3.utils.sha3("welcome"));
+        const startAuction3 = await universalRegistrar.startAuction(name, protocol, shaBid2, {from: accounts[2]});
+        assert.equal(startAuction3.receipt.status, true);
       } catch (err) {
         console.log(err);
       }
@@ -127,24 +148,44 @@ contract('UniversalRegistrar', function (accounts) {
 
         const transfer1 = await portalNetworkToken.transfer(accounts[1], "5000000000000000000", {from: accounts[0]});
         assert.equal(transfer1.receipt.status, true);
+        const transfer2 = await portalNetworkToken.transfer(accounts[2], "6000000000000000000", {from: accounts[0]});
+        assert.equal(transfer2.receipt.status, true);
 
-        const bidderBalanceBefore = await portalNetworkToken.balanceOf.call(accounts[1]);
+        const bidderBalanceBefore1 = await portalNetworkToken.balanceOf.call(accounts[1]);
+        const bidderBalanceBefore2 = await portalNetworkToken.balanceOf.call(accounts[2]);
         const auctionPoolAddress = await portalNetworkToken.auctionPoolAddr.call();
         const auctionPoolBalanceBefore = await portalNetworkToken.balanceOf.call(auctionPoolAddress);
-        console.log(new BN(bidderBalanceBefore, 16).toString(10), new BN(auctionPoolBalanceBefore, 16).toString(10));
+        assert.equal(new BN(bidderBalanceBefore1, 16).toString(10), "5000000000000000000");
+        assert.equal(new BN(bidderBalanceBefore2, 16).toString(10), "6000000000000000000");
+        assert.equal(new BN(auctionPoolBalanceBefore, 16).toString(10), "0");
+        //console.log(new BN(bidderBalanceBefore, 16).toString(10), new BN(auctionPoolBalanceBefore, 16).toString(10));
 
         sleep.sleep(5);        
 
         const entries = await universalRegistrar.entries.call(name, protocol);
+        assert.equal(new BN(entries[0], 16).toString(10), "4");
         //console.log(new BN(entries[3], 16).toString(10), ((new Date()).getTime() / 1000));
+
+        const revealAuction2 = await universalRegistrar.revealAuction(name, protocol, "1000000000000000000", web3.utils.sha3("welcome"), {from: accounts[2]});
+        assert.equal(revealAuction2.receipt.status, true);
+        const bidderBalanceProcess2 = await portalNetworkToken.balanceOf.call(accounts[2]);
+        const auctionPoolBalanceProcess1 = await portalNetworkToken.balanceOf.call(auctionPoolAddress);
+        assert.equal(new BN(bidderBalanceProcess2, 16).toString(10), "5000000000000000000");
+        assert.equal(new BN(auctionPoolBalanceProcess1, 16).toString(10), "1000000000000000000");
+
+        sleep.sleep(1);
 
         const revealAuction1 = await universalRegistrar.revealAuction(name, protocol, "2000000000000000000", web3.utils.sha3("secret"), {from: accounts[1]});
         assert.equal(revealAuction1.receipt.status, true);
-
+        
         // TODO balance should change
-        const bidderBalanceAfter = await portalNetworkToken.balanceOf.call(accounts[1]);
-        const auctionPoolBalanceAfter = await portalNetworkToken.balanceOf.call(auctionPoolAddress);
-        console.log(new BN(bidderBalanceAfter, 16).toString(10), new BN(auctionPoolBalanceAfter, 16).toString(10));
+        const bidderBalanceAfter1 = await portalNetworkToken.balanceOf.call(accounts[1]);
+        const bidderBalanceAfter2 = await portalNetworkToken.balanceOf.call(accounts[2]);
+        const auctionPoolBalanceAfter2 = await portalNetworkToken.balanceOf.call(auctionPoolAddress);
+        assert.equal(new BN(bidderBalanceAfter1, 16).toString(10), "3000000000000000000");
+        assert.equal(new BN(bidderBalanceAfter2, 16).toString(10), "6000000000000000000");
+        assert.equal(new BN(auctionPoolBalanceAfter2, 16).toString(10), "2000000000000000000");
+        //console.log(new BN(bidderBalanceAfter, 16).toString(10), new BN(auctionPoolBalanceAfter, 16).toString(10));
       } catch (err) {
         console.log(err);
       }
@@ -171,6 +212,29 @@ contract('UniversalRegistrar', function (accounts) {
         const bidderBalanceAfter = await portalNetworkToken.balanceOf.call(accounts[1]);
         assert.equal(new BN(bidderBalanceAfter, 16).toString(10), "4000000000000000000");
         assert.equal(new BN(prtAccrueAddressBalanceAfter, 16).toString(10), "1000000000000000000");
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
+    it('transfer domain ownership', async () => {
+      try {
+        let universalRegistry = await UniversalRegistry.deployed();
+        let universalRegistrar = await UniversalRegistrar.deployed();
+        const name = 'welcome';
+        const protocol = 'etc';
+
+        const registrant1 = await universalRegistry.registrant(name + "." + protocol);
+        assert.equal(registrant1, accounts[1]);
+
+        const transfer1 = await universalRegistrar.transfer(name, protocol, accounts[2], {from: accounts[1]});
+        assert.equal(transfer1.receipt.status, true);
+
+        const entries = await universalRegistrar.entries(name, protocol);
+        assert.equal(entries[5], accounts[2], 'transfer is\'t correct');
+
+        const registrant2 = await universalRegistry.registrant(name + "." + protocol);
+        assert.equal(registrant2, accounts[2]);
       } catch (err) {
         console.log(err);
       }

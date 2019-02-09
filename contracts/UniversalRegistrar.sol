@@ -50,10 +50,10 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
     }
 
     // Check the state
-    modifier inState(string _name, string _protocol, Mode _state) {
-        require(state(_name, _protocol) == _state, "state is different");
-        _;
-    }
+    //modifier inState(string _name, string _protocol, Mode _state) {
+    //    require(state(_name, _protocol) == _state, "state is different");
+    //    _;
+    //}
 
     modifier onlyBnsOwner(string _name, string _protocol) {
         // TODO check the domain owner, msg.sender is the highest bidder
@@ -220,7 +220,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         );
 
         // TODO update UniversalRegistry
-        //registry.setRegistrant(_name, _protocol, msg.sender);
+        registry.setRegistrant(_name, _protocol, msg.sender);
 
         // TODO emit event
         emit BidFinalized(msg.sender, _name, _protocol, entry.highestBid, now);
@@ -261,7 +261,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
      * @param _name Name of BNS
      * @param _protocol Protocol of BNS
      */
-    function entries(string _name, string _protocol) external view returns (Mode, string, string, uint, uint, uint) {
+    function entries(string _name, string _protocol) external view returns (Mode, string, uint, uint, uint, address) {
         // TODO check name is available
         require(_name.toSlice().len() > 0, "Name length incorrect");
         // TODO check protocol is available
@@ -272,7 +272,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         string memory bns = _name.toSlice().concat(protocol.toSlice());
 
         Entry storage entry = _entries[bns];
-        return (state(_name, _protocol), entry.name, entry.protocol, entry.registrationDate, entry.value, entry.highestBid);
+        return (state(_name, _protocol), bns, entry.registrationDate, entry.value, entry.highestBid, entry.owner);
     }
 
     // State transitions for names:
@@ -289,13 +289,14 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         // TODO check protocol is available
         require(NameRegex.nameMatches(_name), "Name mismatch");
         // TODO check name is available
-        require(_name.toSlice().len() >= protocolEntry.nameMinLength, "Name length incorrect");
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
 
         Entry storage entry = _entries[bns];
 
-        if (!isAllowed(_protocol, now)) {
+        if (_name.toSlice().len() > protocolEntry.nameMaxLength || 
+            _name.toSlice().len() < protocolEntry.nameMinLength || 
+            !isAllowed(_protocol, now)) {
             return Mode.NotYetAvailable;
         } else if (now < entry.registrationDate) {
             if (now < (entry.registrationDate - protocolEntry.revealPeriod)) {
