@@ -20,24 +20,24 @@
     </h1>
     <div class='clearfix'>
       <div class='fl pad1y space-right2'>
-        <span class="strong">18.42% </span>
+        <span class="strong">42.11% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>7/38</span>
+        <span class='fraction'>16/38</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">10% </span>
+        <span class="strong">23.33% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>3/30</span>
+        <span class='fraction'>7/30</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">27.27% </span>
+        <span class="strong">54.55% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>3/11</span>
+        <span class='fraction'>6/11</span>
       </div>
       <div class='fl pad1y space-right2'>
-        <span class="strong">19.51% </span>
+        <span class="strong">43.9% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>8/41</span>
+        <span class='fraction'>18/41</span>
       </div>
     </div>
   </div>
@@ -241,9 +241,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -295,29 +295,15 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
+<span class="cline-any cline-yes">2×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -327,6 +313,20 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -402,9 +402,9 @@ contract UniversalRegistry is Owned, NameRegex, ProtocolRegex {
     mapping (string =&gt; address) protocolOwner;
     string[] _protocols;
 &nbsp;
-<span class="fstat-no" title="function not covered" >    modifier onlyProtocolOwner(string _protocol</span>) {
-<span class="cstat-no" title="statement not covered" >        require(_protocol.toSlice().len() &gt; 0, "Protocol length incorrect")</span>;
-<span class="cstat-no" title="statement not covered" >        require(protocolOwner[_protocol] == msg.sender, "sender is not protocol owner")</span>;
+    modifier onlyProtocolOwner(string _protocol) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_protocol.toSlice().len() &gt; 0, "Protocol length incorrect");
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(protocolOwner[_protocol] == msg.sender, "sender is not protocol owner");
         _;
     }
 &nbsp;
@@ -456,14 +456,14 @@ contract UniversalRegistry is Owned, NameRegex, ProtocolRegex {
      * @param _protocol Protocol of BNS
      * @param _registrant Registrant of BNS
      */
-<span class="fstat-no" title="function not covered" >    function setRegistrant(string _name, string _protocol, address _registrant) external onlyProtocolOwner(_protocol</span>) {
-<span class="cstat-no" title="statement not covered" >        require(_name.toSlice().len() &gt; 0, "Name length incorrect")</span>;
-<span class="cstat-no" title="statement not covered" >        require(_protocol.toSlice().len() &gt; 0, "Protocol length incorrect")</span>;
-<span class="cstat-no" title="statement not covered" >        string memory protocol = ".".toSlice().concat(_protocol.toSlice())</span>;
-<span class="cstat-no" title="statement not covered" >        string memory bns = _name.toSlice().concat(protocol.toSlice())</span>;
+    function setRegistrant(string _name, string _protocol, address _registrant) external onlyProtocolOwner(_protocol) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_name.toSlice().len() &gt; 0, "Name length incorrect");
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(_protocol.toSlice().len() &gt; 0, "Protocol length incorrect");
+        string memory protocol = ".".toSlice().concat(_protocol.toSlice());
+        string memory bns = _name.toSlice().concat(protocol.toSlice());
         //require(records[bns].registrant == address(0), "");
-<span class="cstat-no" title="statement not covered" >        emit NewRegistrant(_name, _protocol, _registrant);</span>
-<span class="cstat-no" title="statement not covered" >        records[bns].registrant = _registrant</span>;
+        emit NewRegistrant(_name, _protocol, _registrant);
+        records[bns].registrant = _registrant;
     }
 &nbsp;
     /**
@@ -487,8 +487,8 @@ contract UniversalRegistry is Owned, NameRegex, ProtocolRegex {
      * 
      * @param bns BNS
      */
-<span class="fstat-no" title="function not covered" >    function registrant(string bns) external view returns (address</span>) {
-<span class="cstat-no" title="statement not covered" >        return records[bns].registrant;</span>
+    function registrant(string bns) external view returns (address) {
+        return records[bns].registrant;
     }
 &nbsp;
     /**
@@ -535,7 +535,7 @@ contract UniversalRegistry is Owned, NameRegex, ProtocolRegex {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sat Feb 09 2019 00:51:26 GMT+0800 (CST)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Sat Feb 09 2019 11:54:02 GMT+0800 (CST)
 </div>
 </div>
 <script src="../prettify.js"></script>
