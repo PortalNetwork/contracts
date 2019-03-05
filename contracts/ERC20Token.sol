@@ -16,7 +16,8 @@ contract ERC20Token is ERC20Interface {
     mapping(address => mapping (address => uint256)) allowed;
 
 
-    constructor(string _name, string _symbol, uint8 _decimals, uint256 _totalSupply, address _initialTokenHolder) public {
+    constructor(string _name, string _symbol, uint8 _decimals, uint256 _totalSupply, address _initialTokenHolder) public 
+    {
         tokenName = _name;
         tokenSymbol = _symbol;
         tokenDecimals = _decimals;
