@@ -17,6 +17,13 @@ contract('Name Regex', function () {
 
         assert.equal(await nameRegex.nameMatches('x'), true, 'name isn\'t correct');
         assert.equal(await nameRegex.nameMatches('-'), false, 'name isn\'t correct');
+        assert.equal(await nameRegex.nameMatches('+'), false, 'name isn\'t correct');
+        assert.equal(await nameRegex.nameMatches('*'), false, 'name isn\'t correct');
+        assert.equal(await nameRegex.nameMatches('/'), false, 'name isn\'t correct');
+        assert.equal(await nameRegex.nameMatches('\\'), false, 'name isn\'t correct');
+        assert.equal(await nameRegex.nameMatches('info.phyrextsai'), false, 'name isn\'t correct');
+        assert.equal(await nameRegex.nameMatches('ethereum.eth'), false, 'name isn\'t correct');
+        assert.equal(await nameRegex.nameMatches('1234567890'), true, 'name isn\'t correct');
       } catch (err) {
         console.log(err);
       }
