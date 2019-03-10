@@ -17,7 +17,14 @@ contract('Protocol Regex', function () {
         let protocolRegex = await ProtocolRegex.deployed();
 
         assert.equal(await protocolRegex.protocolMatches('ae'), true, 'protocol isn\'t correct');
+        assert.equal(await protocolRegex.protocolMatches('icon'), true, 'protocol isn\'t correct');
         assert.equal(await protocolRegex.protocolMatches('x'), false, 'protocol isn\'t correct');
+        assert.equal(await protocolRegex.protocolMatches('-'), false, 'protocol isn\'t correct');
+        assert.equal(await protocolRegex.protocolMatches('.'), false, 'protocol isn\'t correct');
+        assert.equal(await protocolRegex.protocolMatches('+'), false, 'protocol isn\'t correct');
+        assert.equal(await protocolRegex.protocolMatches('/'), false, 'protocol isn\'t correct');
+        assert.equal(await protocolRegex.protocolMatches('*'), false, 'protocol isn\'t correct');
+        assert.equal(await protocolRegex.protocolMatches('\\'), false, 'protocol isn\'t correct');
       } catch (err) {
         console.log(err);
       }
