@@ -139,7 +139,21 @@ contract('UniversalRegistrar', function (accounts) {
       }
     });
 
-    it('reveal auction', async () => {
+    it('start auction with minimum bidding price', async () => {
+      try {
+        let universalRegistrar = await UniversalRegistrar.deployed();
+        const name = 'minimum';
+        const protocol = 'etc';
+
+        const shaBid3 = await universalRegistrar.shaBid(name, protocol, "1000000000000000000", web3.utils.sha3("secret"));
+        const startAuction4 = await universalRegistrar.startAuction(name, protocol, shaBid3, {from: accounts[3]});
+        assert.equal(startAuction4.receipt.status, true);
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
+    it('reveal auction with correct name', async () => {
       try {
         let portalNetworkToken = await PortalNetworkToken.deployed();
         let universalRegistrar = await UniversalRegistrar.deployed();
@@ -191,7 +205,33 @@ contract('UniversalRegistrar', function (accounts) {
       }
     });
 
-    it('finalize auction', async () => {
+    it('reveal auction with minimum bidding price', async () => {
+      try {
+        let portalNetworkToken = await PortalNetworkToken.deployed();
+        let universalRegistrar = await UniversalRegistrar.deployed();
+        const name = 'minimum';
+        const protocol = 'etc';
+
+        const transfer3 = await portalNetworkToken.transfer(accounts[3], "10000000000000000000", {from: accounts[0]});
+        assert.equal(transfer3.receipt.status, true);
+
+        const bidderBalanceBefore3 = await portalNetworkToken.balanceOf.call(accounts[3]);
+        assert.equal(new BN(bidderBalanceBefore3, 16).toString(10), "10000000000000000000");
+
+        const entries = await universalRegistrar.entries.call(name, protocol);
+        assert.equal(new BN(entries[0], 16).toString(10), "4");
+
+        const revealAuction3 = await universalRegistrar.revealAuction(name, protocol, "1000000000000000000", web3.utils.sha3("secret"), {from: accounts[3]});
+        assert.equal(revealAuction3.receipt.status, true);
+
+        const bidderBalanceAfter3 = await portalNetworkToken.balanceOf.call(accounts[3]);
+        assert.equal(new BN(bidderBalanceAfter3, 16).toString(10), "9000000000000000000");
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
+    it('finalize auction with correct name', async () => {
       try {
         let portalNetworkToken = await PortalNetworkToken.deployed();
         let universalRegistrar = await UniversalRegistrar.deployed();
@@ -212,6 +252,28 @@ contract('UniversalRegistrar', function (accounts) {
         const bidderBalanceAfter = await portalNetworkToken.balanceOf.call(accounts[1]);
         assert.equal(new BN(bidderBalanceAfter, 16).toString(10), "4000000000000000000");
         assert.equal(new BN(prtAccrueAddressBalanceAfter, 16).toString(10), "1000000000000000000");
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
+    it('finalize auction with minimum bidding price', async () => {
+      try {
+        let portalNetworkToken = await PortalNetworkToken.deployed();
+        let universalRegistrar = await UniversalRegistrar.deployed();
+        const name = 'minimum';
+        const protocol = 'etc';
+
+        const entries3 = await universalRegistrar.entries.call(name, protocol);
+        
+        const finalizeAuction2 = await universalRegistrar.finalizeAuction(name, protocol, {from: accounts[3]});
+        assert.equal(finalizeAuction2.receipt.status, true);
+
+        const prtAccrueAddress = await portalNetworkToken.prtAccrueAddr.call();
+        const prtAccrueAddressBalanceAfter = await portalNetworkToken.balanceOf.call(prtAccrueAddress);
+        const bidderBalanceAfter = await portalNetworkToken.balanceOf.call(accounts[3]);
+        assert.equal(new BN(bidderBalanceAfter, 16).toString(10), "9000000000000000000");
+        assert.equal(new BN(prtAccrueAddressBalanceAfter, 16).toString(10), "2000000000000000000");
       } catch (err) {
         console.log(err);
       }
