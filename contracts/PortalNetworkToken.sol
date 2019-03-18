@@ -70,7 +70,7 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
      * @param _value The token of the bidding price
      */
     function _transferToAuctionPool(address _from, uint256 _value) internal returns (bool) {
-        if (_value <= 0 || balances[_from] < _value) {
+        if (_value < 0 || balances[_from] < _value) {
             return false;
         }
         balances[_from] = balances[_from].sub(_value);
