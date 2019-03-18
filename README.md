@@ -32,7 +32,7 @@ Universal Registry is to set the blockchain name service owner, ttl and subdomai
 - ProtocolRegex.sol: https://ropsten.etherscan.io/tx/0xe4fa1ea2bfe7d748744bb4e9612e65185af992e76f1c2ce5abf8c20507528584
 - UniversalRegistry.sol: https://ropsten.etherscan.io/tx/0xe5831343854b0be0384eef2fa63332d8a554e1532593d7f2c0072a67702f26c9
 - UniversalRegistrar.sol: https://ropsten.etherscan.io/tx/0x7835695e50d494a9753bbbb24e91b8f72d410225e353f633985d006c565a4cdf
-- PortalNetworkToken.sol: https://ropsten.etherscan.io/tx/0xe617df91dfb7e7728269f832887fb0c72d32a0e1068c03f421337e1b38dfeb1b
+- PortalNetworkToken.sol: https://ropsten.etherscan.io/tx/0x7caafab84e2a293e3756b09df1e40b7b6b5063ebf3c55c132140f293c0090f52
 
 
 | Network    | Contract Name      | Contract address                                   | Transaction hash
@@ -41,7 +41,7 @@ Universal Registry is to set the blockchain name service owner, ttl and subdomai
 | Ropsten    | ProtocolRegex      | [0x2bab9f0a7d21ae8fb35af5a88eacc66cfdbc541a](https://ropsten.etherscan.io/address/0x2bab9f0a7d21ae8fb35af5a88eacc66cfdbc541a) | [0xe4fa1ea2bfe7d748744bb4e9612e65185af992e76f1c2ce5abf8c20507528584](https://ropsten.etherscan.io/tx/0xe4fa1ea2bfe7d748744bb4e9612e65185af992e76f1c2ce5abf8c20507528584)
 | Ropsten    | UniversalRegistry  | [0x76827857ac0c927690477c9d6667ffafc57247db](https://ropsten.etherscan.io/address/0x76827857ac0c927690477c9d6667ffafc57247db) | [0xe5831343854b0be0384eef2fa63332d8a554e1532593d7f2c0072a67702f26c9](https://ropsten.etherscan.io/tx/0xe5831343854b0be0384eef2fa63332d8a554e1532593d7f2c0072a67702f26c9)
 | Ropsten    | UniversalRegistrar | [0xf576c44b9bc18c8030fa2fe62e1fe1e03e280abc](https://ropsten.etherscan.io/address/0xf576c44b9bc18c8030fa2fe62e1fe1e03e280abc) | [0x7835695e50d494a9753bbbb24e91b8f72d410225e353f633985d006c565a4cdf](https://ropsten.etherscan.io/tx/0x7835695e50d494a9753bbbb24e91b8f72d410225e353f633985d006c565a4cdf)
-| Ropsten    | PortalNetworkToken | [0xaba089b09439766d057c8b5b920ed8e1a19f30cc](https://ropsten.etherscan.io/address/0xaba089b09439766d057c8b5b920ed8e1a19f30cc) | [0xe617df91dfb7e7728269f832887fb0c72d32a0e1068c03f421337e1b38dfeb1b](https://ropsten.etherscan.io/tx/0xe617df91dfb7e7728269f832887fb0c72d32a0e1068c03f421337e1b38dfeb1b)
+| Ropsten    | PortalNetworkToken | [0x6a3818ceea34bcf9f95b34b5f90e02071f4e757c](https://ropsten.etherscan.io/address/0x6a3818ceea34bcf9f95b34b5f90e02071f4e757c) | [0x7caafab84e2a293e3756b09df1e40b7b6b5063ebf3c55c132140f293c0090f52](https://ropsten.etherscan.io/tx/0x7caafab84e2a293e3756b09df1e40b7b6b5063ebf3c55c132140f293c0090f52)
 
 ## Development
 
