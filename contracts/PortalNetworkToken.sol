@@ -10,8 +10,8 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
     using strings for *;
 
     address public prtAccrueAddr;
-    address public universalRegistrarAddr;
     address public auctionPoolAddr;
+    mapping (string => address) protocolRegistrarAddr;
 
     event PRTAccrue(
         address indexed _owner, 
@@ -22,34 +22,36 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
         uint256 _value
     );
     
-    event UpgradeUniversalRegistrar(address _universalRegistrarAddr);
+    event UpgradeProtocolRegistrar(string _protocol, address _protocolRegistrarAddr);
     event UpgradePRTAccrue(address _prtAccrueAddr);
     event UpgradeAuctionPool(address _auctionPoolAddr);
 
-    constructor(address _prtAccrueAddr, address _universalRegistrarAddr, address _auctionPoolAddr) public
+    constructor(address _prtAccrueAddr, address _auctionPoolAddr) public
         ERC20Token(TOKEN_NAME, TOKEN_SYMBOL, TOKEN_DECIMALS, TOKEN_TOTALSUPPLY, msg.sender)
     { 
         prtAccrueAddr = _prtAccrueAddr;
-        universalRegistrarAddr = _universalRegistrarAddr;
         auctionPoolAddr = _auctionPoolAddr;
     }
-
+    
     struct Metadata {
         string name;
         string protocol;
         address owner;
         uint registrationDate;
         uint expireDate;
-        uint256 value;
+        uint value;
+        uint highestBid;
     }
 
     mapping (string => Metadata) _metadata;
 
     /**
-     * Only available for the UniversalRegistrar contract
+     * @dev Only available for the ProtocolRegistrar contract
+     * 
+     * @param _protocol The protocol of the BNS
      */
-    modifier onlyUniversalRegistrar() {
-        require(msg.sender == address(universalRegistrarAddr), "sender is not UniversalRegistrar");
+    modifier onlyProtocolRegistrar(string _protocol) {
+        require(msg.sender == address(protocolRegistrarAddr[_protocol]), "sender is not ProtocolRegistrar");
         _;
     }
 
@@ -58,8 +60,9 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
      *
      * @param _from The from address who need to lock the RPT
      * @param _value The tokne of the bidding price
+     * @param _protocol The protocol of the BNS
      */
-    function transferToAuctionPool(address _from, uint256 _value) external onlyUniversalRegistrar returns (bool) {
+    function transferToAuctionPool(address _from, uint256 _value, string _protocol) external onlyProtocolRegistrar(_protocol) returns (bool) {
         return _transferToAuctionPool(_from, _value);
     }
 
@@ -83,8 +86,9 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
      * 
      * @param _to The address of the origin sender
      * @param _value The token of the origin amount
+     * @param _protocol The protocol of the BNS
      */
-    function transferBackToOwner(address _to, uint256 _value) external onlyUniversalRegistrar returns (bool) {
+    function transferBackToOwner(address _to, uint256 _value, string _protocol) external onlyProtocolRegistrar(_protocol) returns (bool) {
         return _transferBackToOwner(_to, _value);
     }
 
@@ -108,6 +112,7 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
      *
      * @param _from The owner of the BNS
      * @param _value The final amount of the BNS
+     * @param _highestBid The highest bid of the BNS
      * @param _name The name of the BNS
      * @param _protocol The protocol of the BNS
      * @param _registrationDate The registration date of the BNS
@@ -115,11 +120,12 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
     function transferWithMetadata(
         address _from, 
         uint256 _value, 
+        uint256 _highestBid,
         string _name, 
         string _protocol, 
         uint _registrationDate
-    ) external onlyUniversalRegistrar returns (bool) {
-        return _transferWithMetadata(_from, _value, _name, _protocol, _registrationDate);
+    ) external onlyProtocolRegistrar(_protocol) returns (bool) {
+        return _transferWithMetadata(_from, _value, _highestBid, _name, _protocol, _registrationDate);
     }
 
     /**
@@ -127,6 +133,7 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
      *
      * @param _from The owner of the BNS
      * @param _value The final amount of the BNS
+     * @param _highestBid The highest bid of the BNS
      * @param _name The name of the BNS
      * @param _protocol The protocol of the BNS
      * @param _registrationDate The registration date of the BNS
@@ -134,6 +141,7 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
     function _transferWithMetadata(
         address _from, 
         uint256 _value, 
+        uint256 _highestBid,
         string _name, 
         string _protocol, 
         uint _registrationDate
@@ -152,6 +160,7 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
         newMetadata.owner = _from;
         newMetadata.registrationDate = _registrationDate;
         newMetadata.expireDate = _expireDate;
+        newMetadata.highestBid = _highestBid;
         newMetadata.value = _value;
 
         emit Transfer(_from, prtAccrueAddr, _value);
@@ -173,6 +182,61 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
     }
 
     /**
+     * @dev set metadata of BNS
+     * 
+     * @param _name The name of the BNS
+     * @param _protocol The protocol of the BNS
+     * @param _owner The owner of the BNS
+     * @param _registrationDate The registration date of the BNS
+     * @param _expireDate The expire date of the BNS
+     * @param _highestBid The highest bid of the BNS
+     * @param _value The final amount of the BNS
+     */
+    function setMetadata(
+        string _name, 
+        string _protocol, 
+        address _owner, 
+        uint _registrationDate, 
+        uint _expireDate, 
+        uint _highestBid, 
+        uint _value) external onlyProtocolRegistrar(_protocol) returns (bool) {
+        return _setMetadata(_name, _protocol, _owner, _registrationDate, _expireDate, _highestBid, _value);
+    }
+
+    /**
+     * @dev The internal function of setMetadata
+     * 
+     * @param _name The name of the BNS
+     * @param _protocol The protocol of the BNS
+     * @param _owner The owner of the BNS
+     * @param _registrationDate The registration date of the BNS
+     * @param _expireDate The expire date of the BNS
+     * @param _highestBid The highest bid of the BNS
+     * @param _value The final amount of the BNS
+     */
+    function _setMetadata(
+        string _name, 
+        string _protocol, 
+        address _owner, 
+        uint _registrationDate, 
+        uint _expireDate, 
+        uint _highestBid, 
+        uint _value) internal returns (bool) {
+        string memory protocol = ".".toSlice().concat(_protocol.toSlice());
+        string memory bns = _name.toSlice().concat(protocol.toSlice());
+        Metadata storage newMetadata = _metadata[bns];
+        newMetadata.name = _name;
+        newMetadata.protocol = _protocol;
+        newMetadata.owner = _owner;
+        newMetadata.registrationDate = _registrationDate;
+        newMetadata.expireDate = _expireDate;
+        newMetadata.highestBid = _highestBid;
+        newMetadata.value = _value;
+        // TODO store data
+        return true;
+    }
+
+    /**
      * @dev Update the address of the PRT accrue pool
      * 
      * @param _newPRTAccrue new PRT accrue address
@@ -190,16 +254,17 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
     /**
      * @dev Update the Universal Registrar contract
      *
-     * @param _newUniversalRegistrar New UniversalRegistrar address
+     * @param _protocol The protocol of the BNS
+     * @param _newProtocolRegistrar New ProtocolRegistrar address
      */
-    function upgradeUniversalRegistrar(address _newUniversalRegistrar) external onlyOwner {
-        require(_newUniversalRegistrar != address(0), "UniversalRegistrar address can not be 0");
-        require(_newUniversalRegistrar != address(this), "UniversalRegistrar address can not as same as PortalNetworkToken address");
-        require(_newUniversalRegistrar != universalRegistrarAddr, "UniversalRegistrar address is as same as current address");
+    function upgradeProtocolRegistrar(string _protocol, address _newProtocolRegistrar) external onlyOwner {
+        require(_newProtocolRegistrar != address(0), "ProtocolRegistrar address can not be 0");
+        require(_newProtocolRegistrar != address(this), "ProtocolRegistrar address can not as same as PortalNetworkToken address");
+        require(_newProtocolRegistrar != protocolRegistrarAddr[_protocol], "ProtocolRegistrar address is as same as current address");
 
-        universalRegistrarAddr = _newUniversalRegistrar;
+        protocolRegistrarAddr[_protocol] = _newProtocolRegistrar;
 
-        emit UpgradeUniversalRegistrar(_newUniversalRegistrar);
+        emit UpgradeProtocolRegistrar(_protocol, _newProtocolRegistrar);
     }
 
     /**
@@ -215,5 +280,14 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
         auctionPoolAddr = _newAuctionPool;
 
         emit UpgradeAuctionPool(_newAuctionPool);
+    }
+
+    /**
+     * @dev Return protocol registrar address
+     * 
+     * @param _protocol The protocol of the BNS
+     */
+    function protocolRegistrar(string _protocol) public view returns (address) {
+        return protocolRegistrarAddr[_protocol];
     }
 }

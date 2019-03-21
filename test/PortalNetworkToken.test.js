@@ -70,11 +70,11 @@ contract('Portal Network Token', function (accounts) {
     it('upgrade universal registrar address', async () => {
       try {
         let PRT = await PortalNetworkToken.deployed();
-        let universalRegistrarAddr = await PRT.universalRegistrarAddr.call();
-        await PRT.upgradeUniversalRegistrar('0x000000000000000000000000000000000000dead', {from: accounts[0]});
-        universalRegistrarAddr = await PRT.universalRegistrarAddr.call();
+        let protocolRegistrarAddr = await PRT.protocolRegistrar.call('prt');
+        await PRT.upgradeProtocolRegistrar('prt', '0x000000000000000000000000000000000000dead', {from: accounts[0]});
+        protocolRegistrarAddr = await PRT.protocolRegistrar.call('prt');
         
-        assert.equal(universalRegistrarAddr.toString().toLowerCase(), '0x000000000000000000000000000000000000dead', 'universal registrar address isn\'t correct');
+        assert.equal(protocolRegistrarAddr.toString().toLowerCase(), '0x000000000000000000000000000000000000dead', 'universal registrar address isn\'t correct');
       } catch (err) {
         console.log(err);
       }

@@ -15,6 +15,20 @@ contract('UniversalRegistrar', function (accounts) {
       }
     });
 
+    it('set protocol registrar to PortalNetworkToken contract', async () => {
+      try {
+        let universalRegistrar = await UniversalRegistrar.deployed();
+        let PRT = await PortalNetworkToken.deployed();
+        let protocolRegistrarAddr = await PRT.protocolRegistrar.call('prt');
+        //await PRT.upgradeProtocolRegistrar('prt', universalRegistrar.address, {from: accounts[0]});
+        //protocolRegistrarAddr = await PRT.protocolRegistrar.call('prt');
+        
+        assert.equal(protocolRegistrarAddr.toString().toLowerCase(), universalRegistrar.address.toLowerCase(), 'universal registrar address isn\'t correct');
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
     it('set registry start date', async () => {
       try {
         let universalRegistrar = await UniversalRegistrar.deployed();
@@ -27,12 +41,12 @@ contract('UniversalRegistrar', function (accounts) {
         const minPrice = "1000000000000000000";
         
         //                                                             5 days  48 hours
-        //await universalRegistrar.setProtocolEntry('etc', 1549344525, 432000,   172800, 10, 6, "1000000000000000000", {from: accounts[0]});
-        await universalRegistrar.setProtocolEntry('etc', now, totalAuctionLength, revealPeriod, nameMaxLength, nameMinLength, "1000000000000000000", {from: accounts[0]});
-        let allowedTime = await universalRegistrar.getAllowedTime('etc');
+        //await universalRegistrar.setProtocolEntry('prt', 1549344525, 432000,   172800, 10, 6, "1000000000000000000", {from: accounts[0]});
+        await universalRegistrar.setProtocolEntry('prt', now, totalAuctionLength, revealPeriod, nameMaxLength, nameMinLength, "1000000000000000000", {from: accounts[0]});
+        let allowedTime = await universalRegistrar.getAllowedTime('prt');
         assert.equal(allowedTime, now, 'allowedTime isn\'t correct');
 
-        let protocolEntry = await universalRegistrar.protocolEntries('etc');
+        let protocolEntry = await universalRegistrar.protocolEntries('prt');
         assert.equal(protocolEntry[1].toNumber(), totalAuctionLength, 'protocolEntry.totalAuctionLength isn\'t correct');
         assert.equal(protocolEntry[2].toNumber(), revealPeriod, 'protocolEntry.revealPeriod isn\'t correct');
         assert.equal(protocolEntry[3].toNumber(), nameMaxLength, 'protocolEntry.nameMaxLength isn\'t correct');
@@ -40,7 +54,7 @@ contract('UniversalRegistrar', function (accounts) {
         assert.equal((new BN(protocolEntry[5], 16)).toString(10), minPrice, 'protocolEntry.minPrice isn\'t correct');
         assert.equal(protocolEntry[6], true, 'protocolEntry.available isn\'t correct');
         
-        let isAllowed = await universalRegistrar.isAllowed('etc', new Date().getTime());
+        let isAllowed = await universalRegistrar.isAllowed('prt', new Date().getTime());
         assert.equal(isAllowed, true, 'isAllowed isn\'t correct');
       } catch (err) {
         console.log(err);
@@ -51,7 +65,7 @@ contract('UniversalRegistrar', function (accounts) {
       try {
         let universalRegistrar = await UniversalRegistrar.deployed();
         const name = 'welcome';
-        const protocol = 'etc';
+        const protocol = 'prt';
 
         let isAllowed = await universalRegistrar.isAllowed(protocol, new Date().getTime());
         assert.equal(isAllowed, true, 'isAllowed isn\'t correct');
@@ -66,7 +80,7 @@ contract('UniversalRegistrar', function (accounts) {
     it('state not yet available', async () => {
       try {
         let universalRegistrar = await UniversalRegistrar.deployed();
-        const protocol = 'etc';
+        const protocol = 'prt';
         
         const name2 = 'wordistoolong';  // too long
         let mode2 = await universalRegistrar.state(name2, protocol);
@@ -84,7 +98,7 @@ contract('UniversalRegistrar', function (accounts) {
       try {
         let universalRegistrar = await UniversalRegistrar.deployed();
         let universalRegistry = await UniversalRegistry.deployed();
-        const protocol = 'etc';
+        const protocol = 'prt';
 
         const registerProtocol1 = await universalRegistry.registerProtocol(protocol, universalRegistrar.address);
         assert.equal(registerProtocol1.receipt.status, true);
@@ -110,7 +124,7 @@ contract('UniversalRegistrar', function (accounts) {
       try {
         let universalRegistrar = await UniversalRegistrar.deployed();
         const name = 'he';
-        const protocol = 'etc';
+        const protocol = 'prt';
 
         const shaBid = await universalRegistrar.shaBid(name, protocol, "2000000000000000000", web3.utils.sha3("secret"));
         const startAuction1 = await universalRegistrar.startAuction(name, protocol, shaBid);
@@ -125,7 +139,7 @@ contract('UniversalRegistrar', function (accounts) {
       try {
         let universalRegistrar = await UniversalRegistrar.deployed();
         const name = 'welcome';
-        const protocol = 'etc';
+        const protocol = 'prt';
 
         const shaBid1 = await universalRegistrar.shaBid(name, protocol, "2000000000000000000", web3.utils.sha3("secret"));
         const startAuction2 = await universalRegistrar.startAuction(name, protocol, shaBid1, {from: accounts[1]});
@@ -143,7 +157,7 @@ contract('UniversalRegistrar', function (accounts) {
       try {
         let universalRegistrar = await UniversalRegistrar.deployed();
         const name = 'minimum';
-        const protocol = 'etc';
+        const protocol = 'prt';
 
         const shaBid3 = await universalRegistrar.shaBid(name, protocol, "1000000000000000000", web3.utils.sha3("secret"));
         const startAuction4 = await universalRegistrar.startAuction(name, protocol, shaBid3, {from: accounts[3]});
@@ -158,7 +172,7 @@ contract('UniversalRegistrar', function (accounts) {
         let portalNetworkToken = await PortalNetworkToken.deployed();
         let universalRegistrar = await UniversalRegistrar.deployed();
         const name = 'welcome';
-        const protocol = 'etc';
+        const protocol = 'prt';
 
         const transfer1 = await portalNetworkToken.transfer(accounts[1], "5000000000000000000", {from: accounts[0]});
         assert.equal(transfer1.receipt.status, true);
@@ -210,7 +224,7 @@ contract('UniversalRegistrar', function (accounts) {
         let portalNetworkToken = await PortalNetworkToken.deployed();
         let universalRegistrar = await UniversalRegistrar.deployed();
         const name = 'minimum';
-        const protocol = 'etc';
+        const protocol = 'prt';
 
         const transfer3 = await portalNetworkToken.transfer(accounts[3], "10000000000000000000", {from: accounts[0]});
         assert.equal(transfer3.receipt.status, true);
@@ -236,7 +250,7 @@ contract('UniversalRegistrar', function (accounts) {
         let portalNetworkToken = await PortalNetworkToken.deployed();
         let universalRegistrar = await UniversalRegistrar.deployed();
         const name = 'welcome';
-        const protocol = 'etc';
+        const protocol = 'prt';
 
         sleep.sleep(10);
 
@@ -262,10 +276,10 @@ contract('UniversalRegistrar', function (accounts) {
         let portalNetworkToken = await PortalNetworkToken.deployed();
         let universalRegistrar = await UniversalRegistrar.deployed();
         const name = 'minimum';
-        const protocol = 'etc';
+        const protocol = 'prt';
 
         const entries3 = await universalRegistrar.entries.call(name, protocol);
-        
+
         const finalizeAuction2 = await universalRegistrar.finalizeAuction(name, protocol, {from: accounts[3]});
         assert.equal(finalizeAuction2.receipt.status, true);
 
@@ -284,7 +298,7 @@ contract('UniversalRegistrar', function (accounts) {
         let universalRegistry = await UniversalRegistry.deployed();
         let universalRegistrar = await UniversalRegistrar.deployed();
         const name = 'welcome';
-        const protocol = 'etc';
+        const protocol = 'prt';
 
         const registrant1 = await universalRegistry.registrant(name + "." + protocol);
         assert.equal(registrant1, accounts[1]);
