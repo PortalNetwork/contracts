@@ -41,6 +41,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
     event BidFinalized(address indexed owner, string name, string protocol, uint value, uint registrationDate);
     event Transfer(address indexed owner, address indexed newOwner, string name, string protocol);
     event UpdatePortalNetworkToken(address portalNetworkTokenAddress);
+    //event Renew(address indexed owner, string name, string protocol, uint expireDate);
 
     Registry registry;
     PortalNetworkToken public portalNetworkToken;
@@ -60,6 +61,13 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
         require(state(_name, _protocol) == Mode.Owned && msg.sender == _entries[bns].owner, "state is not Owned or sender is not BNS owner");
+        _;
+    }
+
+    modifier onlyRootBnsOwner(string _name, string _protocol) {
+        address owner;
+        (owner, , , ) = portalNetworkToken.metadata(_name, _protocol);
+        require(msg.sender == owner, "sender is not root BNS owner");
         _;
     }
 
@@ -214,9 +222,9 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         portalNetworkToken.transferWithMetadata(
             entry.owner, 
             (entry.value > protocolEntry.minPrice) ? entry.value : protocolEntry.minPrice, 
-            entry.highestBid,
             entry.name, 
             entry.protocol, 
+            entry.registrationDate + 365 days,
             entry.registrationDate
         );
 
@@ -238,7 +246,7 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
      * @param _protocol Protocol of BNS
      * @param newOwner The address to transfer ownership to
      */
-    function transfer(string _name, string _protocol, address newOwner) external onlyBnsOwner(_name, _protocol) {
+    function transfer(string _name, string _protocol, address newOwner) external onlyRootBnsOwner(_name, _protocol) {
         // check name is available
         require(_name.toSlice().len() > 0, "Name length incorrect");
         // check protocol is available
@@ -255,7 +263,6 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         emit Transfer(currentOwner, newOwner, _name, _protocol);
     }
 
-    
     /**
      * @dev Get the entries of the BNS
      * 
@@ -393,7 +400,29 @@ contract UniversalRegistrar is Owned, NameRegex, ProtocolRegex {
         );
     }
 
-    // TODO 延長域名時間的 method
-    function renewBns() external only onlyBnsOwner(_name, _protocol) {
-    }
+    /*function renew(string _name, string _protocol) external onlyRootBnsOwner(_name, _protocol) {
+        ProtocolEntry storage protocolEntry = _protocolEntries[_protocol];
+        require(protocolEntry.available == true, "Protocol is not availalbe");
+
+        address owner;
+        uint registrationDate;
+        uint expireDate;
+        uint256 value;
+
+        (owner, registrationDate, expireDate, value) = portalNetworkToken.metadata(_name, _protocol);
+
+        if (!portalNetworkToken.transferToAuctionPool(msg.sender, protocolEntry.minPrice, _protocol)) {
+            return;
+        }
+
+        portalNetworkToken.transferWithMetadata(
+            owner, 
+            value,
+            _name, 
+            _protocol, 
+            (expireDate + 365 days),
+            registrationDate
+        );
+        emit Renew(owner, _name, _protocol, (expireDate + 365 days));
+    }*/
 }
