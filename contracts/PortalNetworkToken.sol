@@ -40,7 +40,6 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
         uint registrationDate;
         uint expireDate;
         uint value;
-        uint highestBid;
     }
 
     mapping (string => Metadata) _metadata;
@@ -112,20 +111,20 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
      *
      * @param _from The owner of the BNS
      * @param _value The final amount of the BNS
-     * @param _highestBid The highest bid of the BNS
      * @param _name The name of the BNS
      * @param _protocol The protocol of the BNS
+     * @param _expireDate The expire date of the BNS
      * @param _registrationDate The registration date of the BNS
      */
     function transferWithMetadata(
         address _from, 
         uint256 _value, 
-        uint256 _highestBid,
         string _name, 
         string _protocol, 
+        uint _expireDate,
         uint _registrationDate
     ) external onlyProtocolRegistrar(_protocol) returns (bool) {
-        return _transferWithMetadata(_from, _value, _highestBid, _name, _protocol, _registrationDate);
+        return _transferWithMetadata(_from, _value, _name, _protocol, _expireDate, _registrationDate);
     }
 
     /**
@@ -133,17 +132,17 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
      *
      * @param _from The owner of the BNS
      * @param _value The final amount of the BNS
-     * @param _highestBid The highest bid of the BNS
      * @param _name The name of the BNS
      * @param _protocol The protocol of the BNS
+     * @param _expireDate The expire date of the BNS
      * @param _registrationDate The registration date of the BNS
      */
     function _transferWithMetadata(
         address _from, 
         uint256 _value, 
-        uint256 _highestBid,
         string _name, 
         string _protocol, 
+        uint _expireDate,
         uint _registrationDate
     ) internal returns (bool) {
         // TODO finalize and move the Token from AuctionPool address to PRTAccrue address
@@ -152,7 +151,6 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
 
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
-        uint _expireDate = _registrationDate + 365 days;
 
         Metadata storage newMetadata = _metadata[bns];
         newMetadata.name = _name;
@@ -160,7 +158,6 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
         newMetadata.owner = _from;
         newMetadata.registrationDate = _registrationDate;
         newMetadata.expireDate = _expireDate;
-        newMetadata.highestBid = _highestBid;
         newMetadata.value = _value;
 
         emit Transfer(_from, prtAccrueAddr, _value);
@@ -189,7 +186,6 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
      * @param _owner The owner of the BNS
      * @param _registrationDate The registration date of the BNS
      * @param _expireDate The expire date of the BNS
-     * @param _highestBid The highest bid of the BNS
      * @param _value The final amount of the BNS
      */
     function setMetadata(
@@ -197,10 +193,9 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
         string _protocol, 
         address _owner, 
         uint _registrationDate, 
-        uint _expireDate, 
-        uint _highestBid, 
+        uint _expireDate,
         uint _value) external onlyProtocolRegistrar(_protocol) returns (bool) {
-        return _setMetadata(_name, _protocol, _owner, _registrationDate, _expireDate, _highestBid, _value);
+        return _setMetadata(_name, _protocol, _owner, _registrationDate, _expireDate, _value);
     }
 
     /**
@@ -211,7 +206,6 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
      * @param _owner The owner of the BNS
      * @param _registrationDate The registration date of the BNS
      * @param _expireDate The expire date of the BNS
-     * @param _highestBid The highest bid of the BNS
      * @param _value The final amount of the BNS
      */
     function _setMetadata(
@@ -220,7 +214,6 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
         address _owner, 
         uint _registrationDate, 
         uint _expireDate, 
-        uint _highestBid, 
         uint _value) internal returns (bool) {
         string memory protocol = ".".toSlice().concat(_protocol.toSlice());
         string memory bns = _name.toSlice().concat(protocol.toSlice());
@@ -230,7 +223,6 @@ contract PortalNetworkToken is Owned, ERC20Token, PortalNetworkTokenConfig {
         newMetadata.owner = _owner;
         newMetadata.registrationDate = _registrationDate;
         newMetadata.expireDate = _expireDate;
-        newMetadata.highestBid = _highestBid;
         newMetadata.value = _value;
         // TODO store data
         return true;
