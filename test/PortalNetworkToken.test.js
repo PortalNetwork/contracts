@@ -23,7 +23,7 @@ contract('Portal Network Token', function (accounts) {
         assert.equal(name, 'Portal Network Token', 'name isn\'t correct');
         assert.equal(symbol, 'PRT', 'symbol isn\'t correct');
         assert.equal(decimals, 18, 'decimals isn\'t correct');
-        assert.equal((new BN(totalSupply, 16)).toString(10), '4000000000000000000000000000', 'totalSupply isn\'t correct');
+        assert.equal((new BN(totalSupply, 16)).toString(10), '1000000000000000000000000000', 'totalSupply isn\'t correct');
       } catch (err) {
         console.log(err);
       }
@@ -45,7 +45,7 @@ contract('Portal Network Token', function (accounts) {
         let PRT = await PortalNetworkToken.deployed();
         let balance = await PRT.balanceOf.call(accounts[0]);
 
-        assert.equal((new BN(balance, 16)).toString(10), '4000000000000000000000000000', 'balance isn\'t correct');
+        assert.equal((new BN(balance, 16)).toString(10), '1000000000000000000000000000', 'balance isn\'t correct');
       } catch (err) {
         console.log(err);
       }
