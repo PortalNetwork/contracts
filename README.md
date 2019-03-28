@@ -15,7 +15,7 @@ An ERC20 standard token, built using the [OpenZeppelin](https://github.com/OpenZ
 - Name: Portal Network Token
 - Symbol: PRT
 - Decimals: 18
-- Total Supply: 4000000000
+- Total Supply: 1000000000
 
 ### Universal Registrar
 Universal Registrar contract is to register a blockchain name service, it using Vickrey auction with the bidding flow.
